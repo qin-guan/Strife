@@ -21,7 +21,7 @@ export const LoginActions = {
 
 const prefix = '/authentication';
 
-export const ApplicationPaths = {
+export const OidcPaths = {
     DefaultLoginRedirectPath: '/',
     ApiAuthorizationClientConfigurationUrl: `_configuration/${ApplicationName}`,
     ApiAuthorizationPrefix: prefix,
