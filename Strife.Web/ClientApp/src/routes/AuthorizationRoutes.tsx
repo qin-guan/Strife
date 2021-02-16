@@ -24,10 +24,10 @@ export function AuthorizationRoutes() {
 }
 
 function loginAction(name: string){
-  return (<Login action={name}></Login>);
+  return (<Login action={name}/>);
 }
 
 function logoutAction(name: string) {
-  return (<Logout action={name}></Logout>);
+  return (<Logout action={name}/>);
 }
 

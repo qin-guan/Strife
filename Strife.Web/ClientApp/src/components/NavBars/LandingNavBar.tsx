@@ -7,52 +7,54 @@ import authorizationService from "../../oidc/AuthorizationService"
 import {OidcPaths} from "../../oidc/AuthorizationConstants";
 
 export const LandingNavBar = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [userName, setUserName] = useState<string>()
+    const [isAuthenticated, setIsAuthenticated] = useState(false)
+    const [userName, setUserName] = useState<string>()
 
-  const subscription = authorizationService.subscribe(() => populateState());
+    const subscription = authorizationService.subscribe(() => populateState());
 
-  useEffect(() => {
-    populateState();
+    useEffect(() => {
+        populateState();
 
-    return () => {
-      authorizationService.unsubscribe(subscription)
+        return () => {
+            authorizationService.unsubscribe(subscription)
+        }
+    }, [])
+
+    async function populateState() {
+        const [isAuthenticated, user] = await Promise.all([authorizationService.isAuthenticated(), authorizationService.getUser()])
+        setIsAuthenticated(isAuthenticated)
+        user && setUserName(user.name)
     }
-  }, [])
 
-  async function populateState() {
-    const [isAuthenticated, user] = await Promise.all([authorizationService.isAuthenticated(), authorizationService.getUser()])
-    setIsAuthenticated(isAuthenticated)
-    user && setUserName(user.name)
-  }
-
-  // const profilePath = `${OidcPaths.Profile}`;
-  // const logoutPath = {pathname: `${OidcPaths.LogOut}`, state: {local: true}};
-  // const registerPath = `${OidcPaths.Register}`;
-  // const loginPath = `${OidcPaths.Login}`;
-
-  return (
-    <Flex p={"3"} align="center">
-      <Box>
-        <Heading size={"md"}>Strife</Heading>
-      </Box>
-      <Spacer/>
-      <Box>
-        {isAuthenticated ? (
-          <Button>Web app</Button>
-        ) : (
-          <>
-            <NavLink to={OidcPaths.Login}>
-              <Button mr={4}>Log in</Button>
-            </NavLink>
-            <NavLink to={OidcPaths.Register}>
-              <Button colorScheme={"teal"}>
-                Sign Up
-              </Button>
-            </NavLink>
-          </>
-        )}
-      </Box>
-    </Flex>
-  )
+    return (
+        <Flex p={"3"} align="center">
+            <Box>
+                <Heading size={"md"}>Strife</Heading>
+            </Box>
+            <Spacer/>
+            <Box>
+                {isAuthenticated ? (
+                    <>
+                        <NavLink to={OidcPaths.IdentityManagePath}>
+                            <Button mr={4}>My Account</Button>
+                        </NavLink>
+                        <NavLink to={"/app"}>
+                            <Button colorScheme={"teal"}>Web app</Button>
+                        </NavLink>
+                    </>
+                ) : (
+                    <>
+                        <NavLink to={OidcPaths.Login}>
+                            <Button mr={4}>Log in</Button>
+                        </NavLink>
+                        <NavLink to={OidcPaths.Register}>
+                            <Button colorScheme={"teal"}>
+                                Sign Up
+                            </Button>
+                        </NavLink>
+                    </>
+                )}
+            </Box>
+        </Flex>
+    )
 }

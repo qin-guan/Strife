@@ -57,7 +57,7 @@ export const Logout: React.FC<LogoutProps> = (props) => {
     const state = { returnUrl };
     const isAuthenticated = await authorizationService.isAuthenticated();
     if (isAuthenticated) {
-      const result: {status: string, message?: string} = await authorizationService.signOut(state);
+      const result: {status: string, message?: string} = await authorizationService.signOut({state});
       switch (result.status) {
         case AuthenticationResultStatus.Redirect:
           break;
@@ -76,7 +76,7 @@ export const Logout: React.FC<LogoutProps> = (props) => {
   }
 
   async function processLogoutCallback() {
-    const result: {status: string, state?: object, message?: string} = await authorizationService.completeSignOut(window.location.href);
+    const result: {status: string, state?: object, message?: string} = await authorizationService.completeSignOut({url: window.location.href});
     switch (result.status) {
       case AuthenticationResultStatus.Redirect:
         // There should not be any redirects as the only time completeAuthentication finishes
