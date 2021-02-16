@@ -10,13 +10,13 @@ export const LandingNavBar = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false)
     const [userName, setUserName] = useState<string>()
 
-    const subscription = authorizationService.subscribe(() => populateState());
+    const subscriptionId = authorizationService.subscribe({callback: () => populateState()});
 
     useEffect(() => {
         populateState();
 
         return () => {
-            authorizationService.unsubscribe(subscription)
+            authorizationService.unsubscribe({subscriptionId})
         }
     }, [])
 
