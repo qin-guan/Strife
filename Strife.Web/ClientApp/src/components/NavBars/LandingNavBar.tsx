@@ -1,6 +1,7 @@
 ﻿import * as React from "react"
 import {useEffect, useState} from "react";
-import {Box, Flex, Spacer, Button, Heading} from "@chakra-ui/react"
+import {Box, Flex, Spacer, Button, Heading, Menu, MenuItem, MenuList, MenuButton} from "@chakra-ui/react"
+import {ChevronDownIcon} from "@chakra-ui/icons"
 import {NavLink} from "react-router-dom";
 
 import authorizationService from "../../oidc/AuthorizationService"
@@ -35,9 +36,19 @@ export const LandingNavBar = () => {
             <Box>
                 {isAuthenticated ? (
                     <>
-                        <NavLink to={OidcPaths.IdentityManagePath}>
-                            <Button mr={4}>My Account</Button>
-                        </NavLink>
+                        <Menu>
+                            <MenuButton as={Button} rightIcon={<ChevronDownIcon/>} mr={4}>
+                                My Account
+                            </MenuButton>
+                            <MenuList>
+                                <NavLink to={OidcPaths.IdentityManagePath}>
+                                    <MenuItem>Manage</MenuItem>
+                                </NavLink>
+                                <NavLink to={{pathname: OidcPaths.LogOut, state: {local: true}}}>
+                                    <MenuItem>Logout</MenuItem>
+                                </NavLink>
+                            </MenuList>
+                        </Menu>
                         <NavLink to={"/app"}>
                             <Button colorScheme={"teal"}>Web app</Button>
                         </NavLink>

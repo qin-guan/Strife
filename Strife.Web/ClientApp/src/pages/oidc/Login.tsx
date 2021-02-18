@@ -5,6 +5,7 @@ import {RouteComponentProps} from 'react-router';
 
 import {LoginActions, OidcPaths, QueryParameterNames} from "../../oidc/AuthorizationConstants";
 import authorizationService, {AuthenticationResultStatus} from "../../oidc/AuthorizationService"
+import {useHostnames} from "../../api/Base";
 
 interface MatchParams {
     [key: string]: string;
@@ -106,7 +107,9 @@ export const Login: React.FC<LoginProps> = (props) => {
     }
 
     function redirectToApiAuthorizationPath({apiAuthorizationPath}: { apiAuthorizationPath: string }) {
-        const redirectUrl = `${window.location.origin}/${apiAuthorizationPath}`;
+        const redirectUrl =
+            apiAuthorizationPath.includes(OidcPaths.IdentityRegisterPath) || apiAuthorizationPath.includes(OidcPaths.IdentityManagePath)
+                ? `${useHostnames.auth}/${apiAuthorizationPath}` : `${window.location.origin}/${apiAuthorizationPath}`;
         // It's important that we do a replace here so that when the user hits the back arrow on the
         // browser they get sent back to where it was on the app instead of to an endpoint on this
         // component.

@@ -93,7 +93,7 @@ export class AuthorizeService {
             const user = await userManager.signinCallback(url);
             this.updateState({user});
 
-            return this.success(user.state)
+            return this.success(user)
         } catch (error) {
             console.log('There was an error signing in: ', error);
             return this.fail({message: "There was an error signing in."})
