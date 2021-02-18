@@ -2,6 +2,7 @@ import * as React from "react"
 import {useEffect, useState} from "react"
 
 import {RouteComponentProps} from 'react-router';
+import {Heading, Text, Center, Spinner, VStack} from "@chakra-ui/react"
 
 import {LoginActions, OidcPaths, QueryParameterNames} from "../../oidc/AuthorizationConstants";
 import authorizationService, {AuthenticationResultStatus} from "../../oidc/AuthorizationService"
@@ -123,20 +124,14 @@ export const Login: React.FC<LoginProps> = (props) => {
         window.location.replace(returnUrl)
         // history.replace(returnUrl);
     }
-
-    if (!!message) {
-        return <div>{message}</div>
-    } else {
-        switch (action) {
-            case LoginActions.Login:
-                return (<div>Processing login</div>);
-            case LoginActions.LoginCallback:
-                return (<div>Processing login callback</div>);
-            case LoginActions.Profile:
-            case LoginActions.Register:
-                return (<div></div>);
-            default:
-                throw new Error(`Invalid action '${action}'`);
-        }
-    }
+    
+    return (
+        <Center w={"100vw"} h={"100vh"}>
+            <VStack spacing={4}>
+                <Spinner size="xl" />
+                <Heading>Processing login</Heading>
+                <Text>{message ?? "This may take up to a minute"}</Text>
+            </VStack>
+        </Center>
+    )
 }

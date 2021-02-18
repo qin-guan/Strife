@@ -1,10 +1,12 @@
 import * as React from "react"
 import {useEffect, useState} from "react"
 
-import {RouteComponentProps, useHistory, useLocation} from 'react-router';
+import {RouteComponentProps, useLocation} from 'react-router';
+import {NavLink} from "react-router-dom";
 
 import {LogoutActions, OidcPaths, QueryParameterNames} from "../../oidc/AuthorizationConstants";
 import authorizationService, {AuthenticationResultStatus} from "../../oidc/AuthorizationService"
+import {Center, Heading, Spinner, Text, VStack, Button} from "@chakra-ui/react";
 
 interface MatchParams {
     [key: string]: string;
@@ -114,22 +116,18 @@ export const Logout: React.FC<LogoutProps> = (props) => {
         // return history.replace(returnUrl);
     }
 
-
-    if (!isReady) {
-        return <div></div>
-    }
-    if (!!message) {
-        return (<div>{message}</div>);
-    } else {
-        switch (action) {
-            case LogoutActions.Logout:
-                return (<div>Processing logout</div>);
-            case LogoutActions.LogoutCallback:
-                return (<div>Processing logout callback</div>);
-            case LogoutActions.LoggedOut:
-                return (<div>{message}</div>);
-            default:
-                throw new Error(`Invalid action '${action}'`);
-        }
-    }
+    return (
+        <Center w={"100vw"} h={"100vh"}>
+            <VStack spacing={4}>
+                <Spinner size="xl"/>
+                <Heading>Processing logout</Heading>
+                <Text>{message ?? "This may take up to a minute"}</Text>
+                {message && (
+                    <NavLink to={"/"}>
+                        <Button>Go back to homepage</Button>
+                    </NavLink>
+                )}
+            </VStack>
+        </Center>
+    )
 }

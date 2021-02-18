@@ -6,11 +6,12 @@ import {NavLink} from "react-router-dom";
 
 import authorizationService from "../../oidc/AuthorizationService"
 import {OidcPaths} from "../../oidc/AuthorizationConstants";
+import {useHostnames} from "../../api/Base";
 
 export const LandingNavBar = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false)
     const [userName, setUserName] = useState<string>()
-
+    
     const subscriptionId = authorizationService.subscribe({callback: () => populateState()});
 
     useEffect(() => {
@@ -41,9 +42,9 @@ export const LandingNavBar = () => {
                                 My Account
                             </MenuButton>
                             <MenuList>
-                                <NavLink to={OidcPaths.IdentityManagePath}>
+                                <a href={`${useHostnames.auth}/${OidcPaths.IdentityManagePath}`}>
                                     <MenuItem>Manage</MenuItem>
-                                </NavLink>
+                                </a>
                                 <NavLink to={{pathname: OidcPaths.LogOut, state: {local: true}}}>
                                     <MenuItem>Logout</MenuItem>
                                 </NavLink>
