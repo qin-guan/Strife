@@ -24,7 +24,7 @@
     <Folder Include="ClientApp\src\theme\" />
     <Folder Include="ClientApp\src\pages\" />
     <Folder Include="ClientApp\src\components\" />
-    <Folder Include="ClientApp\src\components\NavBars\" />
+    <Folder Include="ClientApp\src\components\landing\" />
     <Folder Include="ClientApp\src\models\" />
     <Folder Include="ClientApp\src\oidc\" />
   </ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 
 namespace Strife.Configuration.User
@@ -7,5 +8,9 @@ namespace Strife.Configuration.User
     {
         [PersonalData]
         public string DisplayName { get; set; }
+        [PersonalData]
+        public ICollection<Guild.Guild> Guilds { get; set; }
+        [PersonalData]
+        public ICollection<Guild.GuildRole> GuildRoles { get; set; }
     }
 }
