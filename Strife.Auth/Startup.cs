@@ -20,13 +20,12 @@ namespace Strife.Auth
     {
         public StrifeDbOptions StrifeDbOptions { get; private set; }
         public HostnameOptions HostnameOptions { get; private set; }
+        public IConfiguration Configuration { get; }
 
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -40,7 +39,7 @@ namespace Strife.Auth
                 .AddRazorRuntimeCompilation();
             services.AddRazorPages();
 
-            services.AddSwagger(HostnameOptions, "1", new OpenApiInfo {Title = "Strife.Auth"});
+            services.AddSwagger(HostnameOptions, "v1", new OpenApiInfo {Title = "Strife.Auth"});
 
             // Add database services
             services.AddDbContext<StrifeDbContext>(options =>
@@ -73,7 +72,7 @@ namespace Strife.Auth
                 app.UseMigrationsEndPoint();
                 app.UseCors(config => config.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
-                app.UseSwaggerCore("1", "Strife.Auth");
+                app.UseSwaggerCore("v1", "Strife.Auth");
             }
 
             app.UseHttpsRedirection();

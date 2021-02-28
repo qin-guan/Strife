@@ -1,11 +1,26 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>194f3b2f-30ad-441a-a581-89050f1da673</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.0.4" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="7.1.6" />
+    <PackageReference Include="MassTransit.AspNetCore" Version="7.1.6" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="5.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Contracts\Commands" />
+    <Folder Include="Contracts\Events" />
+    <Folder Include="Producers\Guild" />
+    <Folder Include="Services" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Strife.Configuration\Strife.Configuration.csproj" />
   </ItemGroup>
 
 </Project>

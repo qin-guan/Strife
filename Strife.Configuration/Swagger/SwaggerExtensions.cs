@@ -11,12 +11,12 @@ namespace Strife.Configuration.Swagger
     public static class SwaggerExtensions
     {
         // `UseSwaggerCore` is used to avoid conflicts with `UseSwagger`
-        public static IApplicationBuilder UseSwaggerCore(this IApplicationBuilder app, string versionNumber, string projectName)
+        public static IApplicationBuilder UseSwaggerCore(this IApplicationBuilder app, string version, string projectName)
         {
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint($"/swagger/v{versionNumber}/swagger.json", $"{projectName} v{versionNumber}");
+                c.SwaggerEndpoint($"/swagger/{version}/swagger.json", $"{projectName} {version}");
                 c.OAuthClientId("Strife.Web");
                 c.OAuthAppName("Strife.Auth");
                 c.OAuthUsePkce();
@@ -24,11 +24,11 @@ namespace Strife.Configuration.Swagger
 
             return app;
         }
-        public static IServiceCollection AddSwagger(this IServiceCollection services, HostnameOptions hostnameOptions, string versionNumber, OpenApiInfo openApiInfo)
+        public static IServiceCollection AddSwagger(this IServiceCollection services, HostnameOptions hostnameOptions, string version, OpenApiInfo openApiInfo)
         {
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc($"v{versionNumber}", openApiInfo);
+                c.SwaggerDoc(version, openApiInfo);
 
                 // Add identity configs
                 c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
