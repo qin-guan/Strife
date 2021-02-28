@@ -1,12 +1,12 @@
 ﻿import * as React from "react"
-import {LandingNavBar} from "../components/landing/LandingNavBar";
+import { LandingNavBar } from "../components/landing/LandingNavBar";
 
-import {Flex} from "@chakra-ui/react"
+import { Flex } from "@chakra-ui/react"
 
-export function Landing() {
+export const Landing = () => {
     return (
-      <Flex direction={"column"}>
-          <LandingNavBar/>
-      </Flex>
+        <Flex direction={"column"}>
+            <LandingNavBar/>
+        </Flex>
     )
 }

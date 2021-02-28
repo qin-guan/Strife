@@ -1,6 +1,7 @@
 using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 
 using Strife.Configuration.Hostname;
@@ -11,12 +12,12 @@ namespace Strife.Configuration.Swagger
     public static class SwaggerExtensions
     {
         // `UseSwaggerCore` is used to avoid conflicts with `UseSwagger`
-        public static IApplicationBuilder UseSwaggerCore(this IApplicationBuilder app, string version, string projectName)
+        public static IApplicationBuilder UseSwaggerCore(this IApplicationBuilder app, ApiVersion version, string projectName)
         {
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint($"/swagger/{version}/swagger.json", $"{projectName} {version}");
+                c.SwaggerEndpoint($"/swagger/{version.ToString()}/swagger.json", $"{projectName} {version}");
                 c.OAuthClientId("Strife.Web");
                 c.OAuthAppName("Strife.Auth");
                 c.OAuthUsePkce();
@@ -24,11 +25,11 @@ namespace Strife.Configuration.Swagger
 
             return app;
         }
-        public static IServiceCollection AddSwagger(this IServiceCollection services, HostnameOptions hostnameOptions, string version, OpenApiInfo openApiInfo)
+        public static IServiceCollection AddSwagger(this IServiceCollection services, HostnameOptions hostnameOptions, ApiVersion version, OpenApiInfo openApiInfo)
         {
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc(version, openApiInfo);
+                c.SwaggerDoc(version.ToString(), openApiInfo);
 
                 // Add identity configs
                 c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme

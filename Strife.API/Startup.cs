@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,19 +24,19 @@ namespace Strife.API
         {
             Configuration = configuration;
         }
-        
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             StrifeDbOptions = Configuration.GetSection(StrifeDbOptions.StrifeDb).Get<StrifeDbOptions>();
             HostnameOptions = Configuration.GetSection(HostnameOptions.Hostnames).Get<HostnameOptions>();
             RabbitMqOptions = Configuration.GetSection(RabbitMqOptions.RabbitMq).Get<RabbitMqOptions>();
-            
+
             services.Configure<HostnameOptions>(Configuration.GetSection(HostnameOptions.Hostnames));
 
             services.AddControllers();
-            services.AddSwagger(HostnameOptions, "v1", new OpenApiInfo {Title = "Strife.API"});
-            
+            services.AddSwagger(HostnameOptions, new ApiVersion(0, 1, "alpha"), new OpenApiInfo { Title = "Strife.API" });
+
             // Add database services
             services.AddDbContext<StrifeDbContext>(options =>
                 options.UseNpgsql(StrifeDbOptions.ConnectionString,
@@ -52,10 +53,10 @@ namespace Strife.API
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                
+
                 app.UseCors(config => config.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
-                app.UseSwaggerCore("v1", "Strife.API");
+                app.UseSwaggerCore(new ApiVersion(0, 1, "alpha"), "Strife.API");
             }
 
             app.UseHttpsRedirection();

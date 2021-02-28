@@ -1,26 +1,26 @@
 ﻿import * as React from "react"
-import {useEffect, useState} from "react";
-import {Box, Flex, Spacer, Button, Heading, Menu, MenuItem, MenuList, MenuButton} from "@chakra-ui/react"
-import {ChevronDownIcon} from "@chakra-ui/icons"
-import {NavLink} from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Box, Flex, Spacer, Button, Heading, Menu, MenuItem, MenuList, MenuButton } from "@chakra-ui/react"
+import { ChevronDownIcon } from "@chakra-ui/icons"
+import { NavLink } from "react-router-dom";
 
 import authorizationService from "../../oidc/AuthorizationService"
-import {OidcPaths} from "../../oidc/AuthorizationConstants";
-import {useHostnames} from "../../api/Base";
+import { OidcPaths } from "../../oidc/AuthorizationConstants";
+import { hostnames } from "../../api/http/Base";
 
 export const LandingNavBar = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false)
     const [userName, setUserName] = useState<string>()
     
-    const subscriptionId = authorizationService.subscribe({callback: () => populateState()});
+    const subscriptionId = authorizationService.subscribe({ callback: () => populateState() });
 
     useEffect(() => {
         populateState();
 
         return () => {
-            authorizationService.unsubscribe({subscriptionId})
+            authorizationService.unsubscribe({ subscriptionId })
         }
-    }, [])
+    }, [subscriptionId])
 
     async function populateState() {
         const [isAuthenticated, user] = await Promise.all([authorizationService.isAuthenticated(), authorizationService.getUser()])
@@ -42,10 +42,10 @@ export const LandingNavBar = () => {
                                 My Account
                             </MenuButton>
                             <MenuList>
-                                <a href={`${useHostnames.auth}/${OidcPaths.IdentityManagePath}`}>
+                                <a href={`${hostnames.auth}/${OidcPaths.IdentityManagePath}`}>
                                     <MenuItem>Manage</MenuItem>
                                 </a>
-                                <NavLink to={{pathname: OidcPaths.LogOut, state: {local: true}}}>
+                                <NavLink to={{ pathname: OidcPaths.LogOut, state: { local: true } }}>
                                     <MenuItem>Logout</MenuItem>
                                 </NavLink>
                             </MenuList>

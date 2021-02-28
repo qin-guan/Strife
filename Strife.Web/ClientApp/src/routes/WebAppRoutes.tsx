@@ -1,9 +1,9 @@
 import * as React from "react";
-import {Route, Switch} from "react-router-dom";
+import { Route, Switch } from "react-router-dom";
 
-import {Home} from "../pages/app/Home"
+import { Home } from "../pages/app/Home"
 
-export function WebAppRoutes() {
+export const WebAppRoutes = () => {
     return (
         <Switch>
             <Route path={"/"} component={Home}/>

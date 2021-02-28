@@ -1,13 +1,13 @@
 import * as React from "react";
-import {Route, Switch} from "react-router-dom";
+import { Route, Switch } from "react-router-dom";
 
-import {Landing} from "../pages/Landing";
+import { Landing } from "../pages/Landing";
 
-export function LandingRoutes() {
-  return (
-    <Switch>
-      <Route path={"/"} component={Landing}/>
-    </Switch>
-  )
+export const LandingRoutes = () => {
+    return (
+        <Switch>
+            <Route path={"/"} component={Landing}/>
+        </Switch>
+    )
 }
 

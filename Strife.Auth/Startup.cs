@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -39,7 +39,7 @@ namespace Strife.Auth
                 .AddRazorRuntimeCompilation();
             services.AddRazorPages();
 
-            services.AddSwagger(HostnameOptions, "v1", new OpenApiInfo {Title = "Strife.Auth"});
+            services.AddSwagger(HostnameOptions, new ApiVersion(0, 1, "alpha"), new OpenApiInfo {Title = "Strife.Auth"});
 
             // Add database services
             services.AddDbContext<StrifeDbContext>(options =>
@@ -72,7 +72,7 @@ namespace Strife.Auth
                 app.UseMigrationsEndPoint();
                 app.UseCors(config => config.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
-                app.UseSwaggerCore("v1", "Strife.Auth");
+                app.UseSwaggerCore(new ApiVersion(0, 1, "alpha"), "Strife.Auth");
             }
 
             app.UseHttpsRedirection();
