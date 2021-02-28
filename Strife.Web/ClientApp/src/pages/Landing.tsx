@@ -1,5 +1,5 @@
 ﻿import * as React from "react"
-import {LandingNavBar} from "../components/NavBars/LandingNavBar";
+import {LandingNavBar} from "../components/landing/LandingNavBar";
 
 import {Flex} from "@chakra-ui/react"
 
