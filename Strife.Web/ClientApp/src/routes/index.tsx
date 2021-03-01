@@ -1,5 +1,6 @@
 import * as React from "react"
 import { Route, Switch } from "react-router-dom";
+import { AuthorizedRoute } from "../oidc/AuthorizedRoute"
 import { OidcPaths } from "../oidc/AuthorizationConstants";
 
 import { LandingRoutes } from "./LandingRoutes";
@@ -13,7 +14,7 @@ const Routes = () => {
         <Switch>
             <Route exact path={"/"} component={LandingRoutes}/>
             <Route path={OidcPaths.ApiAuthorizationPrefix} component={AuthorizationRoutes}/>
-            <Route path={"/app"} component={WebAppRoutes}/>
+            <AuthorizedRoute path={"/app"} component={WebAppRoutes}/>
 
             <Route component={NotFound}/>
         </Switch>

@@ -14,7 +14,7 @@ export const GuildStore = types
         fetchGuilds: flow(function* () {
             self.status = "loading"
             try {
-                const { data } = yield guildApi.get();
+                const data = yield guildApi.get();
 
                 self.guilds = data
                 self.status = "done"

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -39,7 +40,7 @@ namespace Strife.Auth
                 .AddRazorRuntimeCompilation();
             services.AddRazorPages();
 
-            services.AddSwagger(HostnameOptions, new ApiVersion(0, 1, "alpha"), new OpenApiInfo {Title = "Strife.Auth"});
+            services.AddSwagger(HostnameOptions, new ApiVersion(0, 1, "alpha"), new OpenApiInfo { Title = "Strife.Auth" });
 
             // Add database services
             services.AddDbContext<StrifeDbContext>(options =>
@@ -52,13 +53,16 @@ namespace Strife.Auth
                 .AddEntityFrameworkStores<StrifeDbContext>();
             services.AddIdentityServer()
                 .AddApiAuthorization<StrifeUser, StrifeDbContext>(options =>
-                    options.Clients.AddSPA("Strife.Web",
-                        spa => spa
+                    {
+                        options.Clients.AddSPA("Strife.Web", spa =>
+                        {
+                            spa
                             .WithRedirectUri(
                                 HostnameOptions.GetHostnameWithPath(Hostname.Web, "/authentication/login-callback"))
                             .WithLogoutRedirectUri(
-                                HostnameOptions.GetHostnameWithPath(Hostname.Web, "/authentication/logout-callback"))
-                    ));
+                                HostnameOptions.GetHostnameWithPath(Hostname.Web, "/authentication/logout-callback"));
+                        });
+                    });
             services.AddAuthentication()
                 .AddIdentityServerJwt();
         }

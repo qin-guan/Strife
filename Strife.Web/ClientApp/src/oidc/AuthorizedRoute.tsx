@@ -1,0 +1,45 @@
+import * as React from "react"
+import { Route, Redirect, RouteComponentProps } from "react-router-dom"
+
+import { Heading, Text, Center, Spinner, VStack } from "@chakra-ui/react"
+
+import { OidcPaths, QueryParameterNames } from "./AuthorizationConstants"
+import authorizationService from "./AuthorizationService"
+
+export const AuthorizedRoute = (parentProps: {component: React.ComponentType<RouteComponentProps<any>>, path: string}) => {
+    const [ready, setReady] = React.useState(false)
+    const [authenticated, setAuthenticated] = React.useState(false)
+
+    const onAuthStateChange = async () => {
+        setReady(false)
+        setAuthenticated(await authorizationService.isAuthenticated())
+        setReady(true)
+    }
+
+    React.useEffect(() => {
+        const subscriptionId = authorizationService.subscribe({ callback: onAuthStateChange })
+        onAuthStateChange()
+        return (() => {
+            authorizationService.unsubscribe({ subscriptionId })
+        })
+    }, [])
+
+    if (!ready) {
+        return (
+            <Center w={"100vw"} h={"100vh"}>
+                <VStack spacing={4}>
+                    <Spinner size="xl" />
+                    <Heading>Loading resources</Heading>
+                </VStack>
+            </Center>
+        )
+    }
+
+    const { component: Component, path, ...rest } = parentProps
+
+    const redirectUrl = `${OidcPaths.Login}?${QueryParameterNames.ReturnUrl}=${encodeURIComponent(path)}`
+
+    return (
+        <Route {...rest} render={props => authenticated ? <Component {...props} /> : <Redirect to={redirectUrl}/>}/>
+    )
+}

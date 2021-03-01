@@ -119,8 +119,10 @@ export const Logout: React.FC<LogoutProps> = (props) => {
     return (
         <Center w={"100vw"} h={"100vh"}>
             <VStack spacing={4}>
-                <Spinner size="xl"/>
-                <Heading>Processing logout</Heading>
+                {!message && <Spinner size="xl"/>}
+                <Heading>
+                    {message ? "Completed logout" : "Processing logout"}
+                </Heading>
                 <Text>{message ?? "This may take up to a minute"}</Text>
                 {message && (
                     <NavLink to={"/"}>

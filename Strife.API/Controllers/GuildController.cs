@@ -1,11 +1,14 @@
 using System;
 using System.Threading.Tasks;
-using MassTransit;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using MassTransit;
+
 using Strife.API.Contracts.Events.Guild;
 
 namespace Strife.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class GuildController : ControllerBase
@@ -17,7 +20,13 @@ namespace Strife.API.Controllers
             _publishEndpoint = publishEndpoint;
         }
 
-        [HttpPost("create")]
+        [HttpGet("Guilds")]
+        public ActionResult ReadGuilds()
+        {
+            return Ok();
+        }
+
+        [HttpPost("Create")]
         public ActionResult CreateGuild(string name)
         {
             _publishEndpoint.Publish<IGuildCreated>(new

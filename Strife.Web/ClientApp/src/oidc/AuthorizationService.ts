@@ -194,7 +194,7 @@ export class AuthorizeService {
         }
 
         try {
-            const { data } = await oidcClient.get({ clientConfigPath: OidcPaths.ApiAuthorizationClientConfigurationUrl })
+            const data = await oidcClient.get({ clientConfigPath: OidcPaths.ApiAuthorizationClientConfigurationUrl })
 
             data.automaticSilentRenew = true;
             data.includeIdTokenInSilentRenew = true;
