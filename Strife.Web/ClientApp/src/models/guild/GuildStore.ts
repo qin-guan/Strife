@@ -18,8 +18,6 @@ export const GuildStore = types
             try {
                 const data = yield guildApi.get();
 
-                console.log(data);
-
                 self.guilds = data
                 self.guildSidebarStatus = "done"
             } catch (error) {
@@ -28,15 +26,9 @@ export const GuildStore = types
             } 
         }),
 
-        createGuild: flow(function* (guild: IGuild) {
-            try {
-                const data = yield guildApi.add(guild)
-
-                self.guilds.push(data)
-            } catch (error) {
-                console.error("Failed to create guild", error)
-            }
-        }),
+        addGuild: function ({ guild }: {guild: IGuild}) {
+            self.guilds.push(guild)
+        },
 
         openCreateGuildModal: function () {
             self.createGuildModalOpen = true;

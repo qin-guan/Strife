@@ -2,6 +2,7 @@ namespace Strife.API.Contracts.Events.Guild
 {
     public interface IGuildCreated
     {
-        public Strife.Configuration.Guild.Guild Guild { get; }
+        public string[] UserIds { get; }
+        public string GuildId { get; }
     }
 }

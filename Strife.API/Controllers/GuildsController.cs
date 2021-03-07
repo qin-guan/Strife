@@ -41,6 +41,15 @@ namespace Strife.API.Controllers
             _userService = userService;
         }
 
+        [HttpGet("{guildId}")]
+        [ServiceFilter(typeof(AddUserDataServiceFilter))]
+        public async Task<ActionResult<GuildDto>> ReadGuild(string guildId)
+        {
+            Guid.TryParse(guildId, out var guid);
+            var guild = await _guildService.FindAsync(guid);
+            return Ok(_mapper.Map<Guild, GuildDto>(guild));
+        }
+
         [HttpGet]
         [ServiceFilter(typeof(AddUserDataServiceFilter))]
         public async Task<ActionResult<IEnumerable<GuildDto>>> ReadGuilds()
@@ -60,6 +69,8 @@ namespace Strife.API.Controllers
             guild = await _guildService.AddAsync(guild);
 
             await _userService.JoinGuildAsync(user, guild);
+
+            await _publishEndpoint.Publish<IGuildCreated>(new { GuildId = guild.Id, UserIds = new[] { user.Id }});
 
             return Ok(_mapper.Map<Guild, GuildDto>(guild));
         }

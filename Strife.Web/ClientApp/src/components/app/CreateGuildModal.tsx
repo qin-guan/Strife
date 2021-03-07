@@ -15,11 +15,13 @@ import {
     Button,
 } from "@chakra-ui/react";
 
+import { guilds } from "../../api/http/Guilds";
+
 const guildNameRegex = /^[a-z0-9]+$/i;
 
 export const CreateGuildModal = observer(() => {
     const {
-        guildStore: { createGuildModalOpen, closeCreateGuildModal, createGuild },
+        guildStore: { createGuildModalOpen, closeCreateGuildModal },
     } = useMst();
 
     const [guildName, setGuildName] = React.useState("");
@@ -34,10 +36,16 @@ export const CreateGuildModal = observer(() => {
     const onGuildCreate = async () => {
         setCreatingGuild(true);
 
-        await createGuild({ Name: guildName, Id: "" });
+        try {
+            await guilds.add({ guild: { Name: guildName, Id: "" } });
 
-        setCreatingGuild(false);
-        onClose();
+            setGuildName("");
+            onClose();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setCreatingGuild(false);
+        }
     };
 
     const onGuildNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,7 +83,7 @@ export const CreateGuildModal = observer(() => {
                         mr={3}
                         onClick={onGuildCreate}
                     >
-                        Create
+            Create
                     </Button>
                     <Button onClick={onClose}>Cancel</Button>
                 </ModalFooter>

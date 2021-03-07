@@ -1,3 +1,6 @@
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +15,8 @@ using Strife.API.Extensions;
 using Strife.API.Interfaces;
 using Strife.API.Services;
 using Strife.API.Filters;
+using Strife.API.Hubs;
+using Strife.API.Providers;
 
 using Strife.Configuration.Database;
 using Strife.Configuration.Hostname;
@@ -45,6 +50,8 @@ namespace Strife.API
                     .AddJsonOptions(opts => opts.JsonSerializerOptions.PropertyNamingPolicy = null);
             services.AddSwagger(HostnameOptions, new ApiVersion(0, 1, "alpha"), new OpenApiInfo { Title = "Strife.API" });
 
+            services.AddSignalR();
+
             // Add database services
             services.AddDbContext<StrifeDbContext>(options =>
                 options.UseNpgsql(StrifeDbOptions.ConnectionString,
@@ -65,11 +72,29 @@ namespace Strife.API
                         {
                             ValidateAudience = false
                         };
+
+                        options.Events = new JwtBearerEvents
+                        {
+                            OnMessageReceived = context =>
+                            {
+                                var accessToken = context.Request.Query["access_token"];
+
+                                var path = context.HttpContext.Request.Path;
+                                if (!string.IsNullOrEmpty(accessToken) &&
+                                    (path.StartsWithSegments("/hubs/guild")))
+                                {
+                                    context.Token = accessToken;
+                                }
+
+                                return Task.CompletedTask;
+                            }
+                        };
                     });
 
             services.AddAutoMapper(typeof(Strife.API.Profiles.GuildProfile));
 
-            // Add singletons
+            services.AddSingleton<IUserIdProvider, NameIdUserIdProvider>();
+
             services.AddScoped<AddUserDataServiceFilter>();
             services.AddScoped<IGuildService, GuildService>();
             services.AddScoped<IUserService, UserService>();
@@ -83,7 +108,13 @@ namespace Strife.API
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
 
-                app.UseCors(config => config.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+                app.UseCors(config => 
+                    config
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials()
+                        .WithOrigins(HostnameOptions.Web)
+                );
 
                 app.UseSwaggerCore(new ApiVersion(0, 1, "alpha"), "Strife.API");
             }
@@ -98,6 +129,8 @@ namespace Strife.API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+
+                endpoints.MapHub<GuildHub>("/hubs/guild");
             });
         }
     }

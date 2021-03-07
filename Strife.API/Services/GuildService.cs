@@ -19,6 +19,11 @@ namespace Strife.API.Services
         {
             _context = context;
         }
+
+        public async Task<Guild> FindAsync(Guid guildId)
+        {
+            return await _context.Guilds.FindAsync(guildId);
+        }
         public async Task<IEnumerable<Guild>> FindByUserIdAsync(Guid userId)
         {
             return await _context.GuildStrifeUser

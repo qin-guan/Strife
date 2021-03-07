@@ -19,7 +19,7 @@ export const GuildsSidebar = observer(() => {
     }
 
     return (
-        <Box bg={bg} px={2}>
+        <Box bg={bg} px={2} style={{ overflowY: "scroll" }}>
             {guilds.map((guild) => (
                 <Box py={2}>
                     <Avatar
