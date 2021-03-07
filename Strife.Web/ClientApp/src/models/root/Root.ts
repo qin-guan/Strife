@@ -9,6 +9,7 @@ const Root = types.model({
 
 let initialState = Root.create({
     guildStore: {
+        createGuildModalOpen: false,
         guilds: [],
     }
 })

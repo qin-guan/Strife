@@ -1,6 +1,8 @@
-import { types } from "mobx-state-tree"
+import { types, Instance } from "mobx-state-tree"
 
 export const Guild = types.model({
-    id: types.string,
-    name: types.string,
+    Id: types.string,
+    Name: types.string,
 })
+
+export interface IGuild extends Instance<typeof Guild> {}

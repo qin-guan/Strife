@@ -7,12 +7,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+
 using Strife.API.Extensions;
+using Strife.API.Interfaces;
+using Strife.API.Services;
+using Strife.API.Filters;
 
 using Strife.Configuration.Database;
 using Strife.Configuration.Hostname;
 using Strife.Configuration.RabbitMQ;
 using Strife.Configuration.Swagger;
+using Strife.Configuration.User;
 
 namespace Strife.API
 {
@@ -36,7 +41,8 @@ namespace Strife.API
 
             services.Configure<HostnameOptions>(Configuration.GetSection(HostnameOptions.Hostnames));
 
-            services.AddControllers();
+            services.AddControllers()
+                    .AddJsonOptions(opts => opts.JsonSerializerOptions.PropertyNamingPolicy = null);
             services.AddSwagger(HostnameOptions, new ApiVersion(0, 1, "alpha"), new OpenApiInfo { Title = "Strife.API" });
 
             // Add database services
@@ -47,6 +53,10 @@ namespace Strife.API
 
             services.AddMassTransitCore();
 
+            services.AddIdentityCore<StrifeUser>()
+                .AddEntityFrameworkStores<StrifeDbContext>();
+
+            // Add identity services
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>
                     {
@@ -56,6 +66,13 @@ namespace Strife.API
                             ValidateAudience = false
                         };
                     });
+
+            services.AddAutoMapper(typeof(Strife.API.Profiles.GuildProfile));
+
+            // Add singletons
+            services.AddScoped<AddUserDataServiceFilter>();
+            services.AddScoped<IGuildService, GuildService>();
+            services.AddScoped<IUserService, UserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

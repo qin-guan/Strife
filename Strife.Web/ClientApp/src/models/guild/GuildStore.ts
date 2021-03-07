@@ -1,26 +1,47 @@
 import { flow, types } from "mobx-state-tree";
 
-import { Guild } from "./Guild";
+import { Guild, IGuild } from "./Guild";
 import { Status } from "../status/Status"
 
-import { guild as guildApi } from "../../api/http/Guild";
+import { guilds as guildApi } from "../../api/http/Guilds";
 
 export const GuildStore = types
     .model({
         guilds: types.array(Guild),
-        status: types.optional(Status, "empty"),
+        createGuildModalOpen: types.boolean,
+
+        guildSidebarStatus: types.optional(Status, "empty")
     })
     .actions((self) => ({
         fetchGuilds: flow(function* () {
-            self.status = "loading"
+            self.guildSidebarStatus = "loading"
             try {
                 const data = yield guildApi.get();
 
+                console.log(data);
+
                 self.guilds = data
-                self.status = "done"
+                self.guildSidebarStatus = "done"
             } catch (error) {
                 console.error("Failed to load guilds", error)
-                self.status = "error"
+                self.guildSidebarStatus = "error"
             } 
         }),
+
+        createGuild: flow(function* (guild: IGuild) {
+            try {
+                const data = yield guildApi.add(guild)
+
+                self.guilds.push(data)
+            } catch (error) {
+                console.error("Failed to create guild", error)
+            }
+        }),
+
+        openCreateGuildModal: function () {
+            self.createGuildModalOpen = true;
+        },
+        closeCreateGuildModal: function () {
+            self.createGuildModalOpen = false;
+        }
     }));
