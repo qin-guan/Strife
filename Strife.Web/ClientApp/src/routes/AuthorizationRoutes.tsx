@@ -1,12 +1,12 @@
 import * as React from "react";
 import { Route, Switch } from "react-router-dom";
-import { LoginActions, LogoutActions, OidcPaths } from "../oidc/AuthorizationConstants"
+import { LoginActions, LogoutActions, OidcPaths } from "../oidc/AuthorizationConstants";
 
-import { NotFound } from "../pages/exceptions/NotFound";
-import { Login } from "../pages/oidc/Login";
-import { Logout } from "../pages/oidc/Logout";
+import NotFound from "../pages/exceptions/NotFound";
+import Login from "../pages/oidc/Login";
+import Logout from "../pages/oidc/Logout";
 
-export const AuthorizationRoutes = () => {
+const AuthorizationRoutes = (): React.ReactElement => {
     return (
         <Switch>
             <Route path={OidcPaths.Login} render={() => loginAction(LoginActions.Login)}/>
@@ -20,8 +20,8 @@ export const AuthorizationRoutes = () => {
 
             <Route component={NotFound}/>
         </Switch>
-    )
-}
+    );
+};
 
 function loginAction(name: string){
     return (<Login action={name}/>);
@@ -31,3 +31,4 @@ function logoutAction(name: string) {
     return (<Logout action={name}/>);
 }
 
+export default AuthorizationRoutes;

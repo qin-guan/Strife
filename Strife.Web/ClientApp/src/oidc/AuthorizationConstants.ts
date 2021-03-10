@@ -1,4 +1,4 @@
-﻿export const ApplicationName = "Strife.Web";
+export const ApplicationName = "Strife.Web";
 
 export const QueryParameterNames = {
     ReturnUrl: "returnUrl",

@@ -1,15 +1,23 @@
 import { apiClient } from "./Base";
 
-import { IGuild } from "../../models/guild/Guild"
+import { GuildInstance } from "../../models/guild/Guild";
 
-export const guilds = {
-    find: async ({ id }: {id: string}): Promise<IGuild> => {
-        return await apiClient.get(`Guilds/${id}`).json()
-    },
-    get: async (): Promise<IGuild> => {
-        return await apiClient.get("Guilds").json();
-    },
-    add: async ({ guild }: {guild: IGuild}): Promise<IGuild> => {
-        return await apiClient.post("Guilds", { json: guild }).json();
-    },
-}
+export const get = async (): Promise<GuildInstance> => {
+    return await apiClient.get("Guilds").json();
+};
+
+export const find = async (id: string): Promise<GuildInstance> => {
+    return await apiClient.get(`Guilds/${id}`).json();
+};
+
+export const add = async (guild: GuildInstance): Promise<GuildInstance> => {
+    return await apiClient.post("Guilds", { json: guild }).json();
+};
+
+const guilds = {
+    get,
+    find,
+    add
+};
+
+export default guilds;

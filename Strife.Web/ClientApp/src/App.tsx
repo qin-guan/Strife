@@ -2,13 +2,13 @@ import React from "react";
 import {
     Switch
 } from "react-router-dom";
-import { Flex } from "@chakra-ui/react"
+import { Flex } from "@chakra-ui/react";
 
 import Routes from "./routes";
 
-import { Provider, rootStore } from "./models/root/Root"
+import { Provider, rootStore } from "./models/root/Root";
 
-function App() {
+function App(): React.ReactElement {
     return (
         <Provider value={rootStore}>
             <Switch>

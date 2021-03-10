@@ -15,11 +15,11 @@ import {
     Button,
 } from "@chakra-ui/react";
 
-import { guilds } from "../../api/http/Guilds";
+import guilds from "../../api/http/Guilds";
 
 const guildNameRegex = /^[a-z0-9]+$/i;
 
-export const CreateGuildModal = observer(() => {
+const CreateGuildModal = observer(() => {
     const {
         guildStore: { createGuildModalOpen, closeCreateGuildModal },
     } = useMst();
@@ -37,7 +37,7 @@ export const CreateGuildModal = observer(() => {
         setCreatingGuild(true);
 
         try {
-            await guilds.add({ guild: { Name: guildName, Id: "" } });
+            await guilds.add({ Name: guildName, Id: "" });
 
             setGuildName("");
             onClose();
@@ -83,7 +83,7 @@ export const CreateGuildModal = observer(() => {
                         mr={3}
                         onClick={onGuildCreate}
                     >
-            Create
+                        Create
                     </Button>
                     <Button onClick={onClose}>Cancel</Button>
                 </ModalFooter>
@@ -91,3 +91,5 @@ export const CreateGuildModal = observer(() => {
         </Modal>
     );
 });
+
+export default CreateGuildModal;

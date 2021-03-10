@@ -1,8 +1,8 @@
-import * as React from "react"
+import * as React from "react";
 import { Center, Heading, Button, VStack } from "@chakra-ui/react";
-import { NavLink } from "react-router-dom"
+import { NavLink } from "react-router-dom";
 
-export const NotFound = () => {
+const NotFound = (): React.ReactElement => {
     return (
         <Center w={"100vw"} h={"100vh"}>
             <VStack spacing={5}>
@@ -13,5 +13,7 @@ export const NotFound = () => {
                 </NavLink>
             </VStack>
         </Center>
-    )
-}
+    );
+};
+
+export default NotFound;

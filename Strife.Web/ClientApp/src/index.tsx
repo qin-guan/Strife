@@ -1,11 +1,11 @@
-import * as React from "react"
+import * as React from "react";
 import ReactDOM from "react-dom";
 import reportWebVitals from "./reportWebVitals";
 
-import { ChakraProvider, ColorModeScript } from "@chakra-ui/react"
-import { BrowserRouter as Router } from "react-router-dom"
+import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
+import { BrowserRouter as Router } from "react-router-dom";
 
-import theme from "./theme"
+import theme from "./theme";
 
 import App from "./App";
 

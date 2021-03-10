@@ -1,13 +1,14 @@
 import * as React from "react";
 import { Route, Switch } from "react-router-dom";
 
-import { Home } from "../pages/app/Home"
+import Home from "../pages/app/Home";
 
-export const WebAppRoutes = () => {
+const WebAppRoutes = (): React.ReactElement => {
     return (
         <Switch>
             <Route path={"/"} component={Home}/>
         </Switch>
-    )
-}
+    );
+};
 
+export default WebAppRoutes;

@@ -1,135 +1,160 @@
-import * as React from "react"
-import { useEffect, useState } from "react"
-
-import { RouteComponentProps, useLocation } from "react-router";
+import * as React from "react";
+import { RouteComponentProps, withRouter } from "react-router";
 import { NavLink } from "react-router-dom";
+import {
+    LogoutActions,
+    QueryParameterNames,
+    OidcPaths,
+} from "../../oidc/AuthorizationConstants";
+import authorizationService, {
+    AuthorizationStatus,
+} from "../../oidc/AuthorizationService";
+import {
+    Center,
+    Heading,
+    Spinner,
+    Text,
+    VStack,
+    Button,
+} from "@chakra-ui/react";
 
-import { LogoutActions, OidcPaths, QueryParameterNames } from "../../oidc/AuthorizationConstants";
-import authorizationService, { AuthenticationResultStatus } from "../../oidc/AuthorizationService"
-import { Center, Heading, Spinner, Text, VStack, Button } from "@chakra-ui/react";
-
-interface MatchParams {
-    [key: string]: string;
+interface LogoutProps extends RouteComponentProps<Record<string, string>> {
+  action: string;
 }
 
-interface LogoutProps extends Partial<RouteComponentProps<MatchParams>> {
-    action: string
+interface LogoutState {
+  message: string;
 }
 
-export const Logout: React.FC<LogoutProps> = (props) => {
-    const [isReady, setIsReady] = useState(false)
-    const [message, setMessage] = useState<string>()
-    const [authenticated, setAuthenticated] = useState(false)
+class Logout extends React.Component<LogoutProps, LogoutState> {
+    constructor(props: LogoutProps) {
+        super(props);
+        this.state = {
+            message: "",
+        };
+    }
 
-    const location = useLocation<{ local: boolean }>()
+    async componentDidMount(): Promise<void> {
+        const { action } = this.props;
 
-    const {
-        action,
-        match: { params }
-        = { params: {} }
-    } = props
-
-    useEffect(() => {
-        const getAction = async () => {
-            switch (action) {
-            case LogoutActions.Logout:
-                const { state: { local } = { local: false } } = location
-                if (local) {
-                    await logout({ returnUrl: getReturnUrl({}) });
-                } else {
-                    // This prevents regular links to <app>/authentication/logout from triggering a logout
-                    setIsReady(true)
-                    setMessage("The logout was not initiated from within the page.")
-                }
-                break;
-            case LogoutActions.LogoutCallback:
-                await processLogoutCallback();
-                break;
-            case LogoutActions.LoggedOut:
-                setIsReady(true)
-                setMessage("You successfully logged out!")
-                break;
-            default:
-                throw new Error(`Invalid action '${action}'`);
+        switch (action) {
+        case LogoutActions.Logout:
+            if (!this.props.location) {
+                this.setState({
+                    message: "The logout was not initiated from within the page.",
+                });
+                return;
             }
 
-            const authenticated = await authorizationService.isAuthenticated();
-            setIsReady(true)
-            setAuthenticated(authenticated)
+            const { local } = this.props.location?.state as Record<string, string>;
+
+            if (local) {
+                const returnUrl = this.getReturnUrl();
+                await this.logout(returnUrl);
+            } else {
+                this.setState({
+                    message: "The logout was not initiated from within the page.",
+                });
+            }
+            break;
+        case LogoutActions.LogoutCallback:
+            await this.processLogoutCallback();
+            break;
+        case LogoutActions.LoggedOut:
+            this.setState({ message: "You successfully logged out!" });
+            break;
+        default:
+            throw new Error(`Invalid action '${action}'`);
         }
-        getAction()
-    }, [])
+    }
 
-
-    async function logout({ returnUrl }: { returnUrl: string }) {
-        const state = { returnUrl };
+    async logout(returnUrl: string): Promise<void> {
         const isAuthenticated = await authorizationService.isAuthenticated();
-        if (isAuthenticated) {
-            const result: { status: string, message?: string } = await authorizationService.signOut({ state });
+
+        if (!isAuthenticated) {
+            this.setState({ message: "Invalid authentication result status." });
+        } else {
+            const result = await authorizationService.signOut({ returnUrl });
             switch (result.status) {
-            case AuthenticationResultStatus.Redirect:
+            case AuthorizationStatus.Redirect:
                 break;
-            case AuthenticationResultStatus.Success:
-                await navigateToReturnUrl({ returnUrl });
+            case AuthorizationStatus.Success:
+                this.navigateToReturnUrl(returnUrl);
                 break;
-            case AuthenticationResultStatus.Fail:
-                setMessage(result.message)
+            case AuthorizationStatus.Fail:
+                this.setState({ message: result.message ?? "" });
                 break;
             default:
                 throw new Error("Invalid authentication result status.");
             }
-        } else {
-            setMessage("You successfully logged out!")
         }
     }
 
-    async function processLogoutCallback() {
-        const result: { status: string, state?: object, message?: string } = await authorizationService.completeSignOut({ url: window.location.href });
+    async processLogoutCallback(): Promise<void> {
+        const result = await authorizationService.completeSignOut(
+            window.location.href
+        );
+
         switch (result.status) {
-        case AuthenticationResultStatus.Redirect:
-            // There should not be any redirects as the only time completeAuthentication finishes
-            // is when we are doing a redirect sign in flow.
-            throw new Error("Should not redirect.");
-        case AuthenticationResultStatus.Success:
-            const { state = { returnUrl: undefined } } = result
-            await navigateToReturnUrl({ returnUrl: getReturnUrl(state) });
+        case AuthorizationStatus.Redirect:
+            throw new Error("Should not redirect");
+        case AuthorizationStatus.Success:
+            const { returnUrl } = result.state ?? {};
+            const url = this.getReturnUrl(returnUrl);
+            this.navigateToReturnUrl(url);
             break;
-        case AuthenticationResultStatus.Fail:
-            setMessage(result.message)
+        case AuthorizationStatus.Fail:
+            this.setState({ message: result.message ?? "" });
             break;
         default:
             throw new Error("Invalid authentication result status.");
         }
     }
 
-    function getReturnUrl({ returnUrl }: { returnUrl?: string }) {
-        if (QueryParameterNames.ReturnUrl in params) {
-            if (!params[QueryParameterNames.ReturnUrl].startsWith(`${window.location.origin}/`)) {
-                throw new Error("Invalid return url. The return url needs to have the same origin as the current page.")
+    navigateToReturnUrl(returnUrl: string): void {
+        window.location.replace(returnUrl);
+    }
+
+    getReturnUrl(returnUrl?: string): string {
+        const { match } = this.props;
+        if (match && QueryParameterNames.ReturnUrl in match.params) {
+            if (
+                !match.params[QueryParameterNames.ReturnUrl].startsWith(
+                    `${window.location.origin}/`
+                )
+            ) {
+                throw new Error(
+                    "Invalid return url. The return url needs to have the same origin as the current page."
+                );
             }
         }
-        return returnUrl || params[QueryParameterNames.ReturnUrl] || `${window.location.origin}${OidcPaths.LoggedOut}`;
+
+        return (
+            returnUrl ||
+      (match && match.params[QueryParameterNames.ReturnUrl]) ||
+      `${window.location.origin}${OidcPaths.LoggedOut}`
+        );
     }
 
-    async function navigateToReturnUrl({ returnUrl }: { returnUrl: string }) {
-        window.location.replace(returnUrl)
-        // return history.replace(returnUrl);
+    render(): React.ReactNode {
+        const { message } = this.state;
+        return (
+            <Center w={"100vw"} h={"100vh"}>
+                <VStack spacing={4}>
+                    {!message && <Spinner size="xl" />}
+                    <Heading>
+                        {message ? "Completed logout" : "Processing logout"}
+                    </Heading>
+                    <Text>{message ?? "This may take up to a minute"}</Text>
+                    {message && (
+                        <NavLink to={"/"}>
+                            <Button>Go back to homepage</Button>
+                        </NavLink>
+                    )}
+                </VStack>
+            </Center>
+        );
     }
-
-    return (
-        <Center w={"100vw"} h={"100vh"}>
-            <VStack spacing={4}>
-                {!message && <Spinner size="xl"/>}
-                <Heading>
-                    {message ? "Completed logout" : "Processing logout"}
-                </Heading>
-                <Text>{message ?? "This may take up to a minute"}</Text>
-                {message && (
-                    <NavLink to={"/"}>
-                        <Button>Go back to homepage</Button>
-                    </NavLink>
-                )}
-            </VStack>
-        </Center>
-    )
 }
+
+export default withRouter(Logout);

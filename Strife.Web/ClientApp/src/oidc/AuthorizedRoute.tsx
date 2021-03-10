@@ -1,28 +1,28 @@
-import * as React from "react"
-import { Route, Redirect, RouteComponentProps } from "react-router-dom"
+import * as React from "react";
+import { Route, Redirect, RouteComponentProps } from "react-router-dom";
 
-import { Heading, Text, Center, Spinner, VStack } from "@chakra-ui/react"
+import { Heading, Center, Spinner, VStack } from "@chakra-ui/react";
 
-import { OidcPaths, QueryParameterNames } from "./AuthorizationConstants"
-import authorizationService from "./AuthorizationService"
+import { OidcPaths, QueryParameterNames } from "./AuthorizationConstants";
+import authorizationService from "./AuthorizationService";
 
-export const AuthorizedRoute = (parentProps: {component: React.ComponentType<RouteComponentProps<any>>, path: string}) => {
-    const [ready, setReady] = React.useState(false)
-    const [authenticated, setAuthenticated] = React.useState(false)
+const AuthorizedRoute = (parentProps: {component: React.ComponentType<RouteComponentProps<Record<string, string>>>, path: string}): React.ReactElement => {
+    const [ready, setReady] = React.useState(false);
+    const [authenticated, setAuthenticated] = React.useState(false);
 
     const onAuthStateChange = async () => {
-        setReady(false)
-        setAuthenticated(await authorizationService.isAuthenticated())
-        setReady(true)
-    }
+        setReady(false);
+        setAuthenticated(await authorizationService.isAuthenticated());
+        setReady(true);
+    };
 
     React.useEffect(() => {
-        const subscriptionId = authorizationService.subscribe({ callback: onAuthStateChange })
-        onAuthStateChange()
+        const subscriptionId = authorizationService.subscribe(onAuthStateChange);
+        onAuthStateChange();
         return (() => {
-            authorizationService.unsubscribe({ subscriptionId })
-        })
-    }, [])
+            authorizationService.unsubscribe(subscriptionId);
+        });
+    }, []);
 
     if (!ready) {
         return (
@@ -32,14 +32,16 @@ export const AuthorizedRoute = (parentProps: {component: React.ComponentType<Rou
                     <Heading>Loading resources</Heading>
                 </VStack>
             </Center>
-        )
+        );
     }
 
-    const { component: Component, path, ...rest } = parentProps
+    const { component: Component, path, ...rest } = parentProps;
 
-    const redirectUrl = `${OidcPaths.Login}?${QueryParameterNames.ReturnUrl}=${encodeURIComponent(path)}`
+    const redirectUrl = `${OidcPaths.Login}?${QueryParameterNames.ReturnUrl}=${encodeURIComponent(path)}`;
 
     return (
         <Route {...rest} render={props => authenticated ? <Component {...props} /> : <Redirect to={redirectUrl}/>}/>
-    )
-}
+    );
+};
+
+export default AuthorizedRoute;

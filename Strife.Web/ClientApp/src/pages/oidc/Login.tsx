@@ -1,137 +1,157 @@
-import * as React from "react"
-import { useEffect, useState } from "react"
+import * as React from "react";
 
-import { RouteComponentProps } from "react-router";
-import { Heading, Text, Center, Spinner, VStack } from "@chakra-ui/react"
+import { RouteComponentProps, withRouter } from "react-router";
+import { Heading, Text, Center, Spinner, VStack } from "@chakra-ui/react";
 
-import { LoginActions, OidcPaths, QueryParameterNames } from "../../oidc/AuthorizationConstants";
-import authorizationService, { AuthenticationResultStatus } from "../../oidc/AuthorizationService"
+import {
+    LoginActions,
+    OidcPaths,
+    QueryParameterNames,
+} from "../../oidc/AuthorizationConstants";
+import authorizationService, {
+    AuthorizationStatus,
+} from "../../oidc/AuthorizationService";
+
 import { hostnames } from "../../api/http/Base";
 
-interface MatchParams {
-    [key: string]: string;
+interface LoginProps extends RouteComponentProps<Record<string, string>> {
+    action: string;
 }
 
-interface LoginProps extends Partial<RouteComponentProps<MatchParams>> {
-    action: string
+interface LoginState {
+    message: string;
 }
 
-export const Login: React.FC<LoginProps> = (props) => {
-    const [message, setMessage] = useState<string>()
+class Login extends React.Component<LoginProps, LoginState> {
+    constructor(props: LoginProps) {
+        super(props);
+        this.state = {
+            message: "",
+        };
+    }
 
-    const {
-        action,
-        match: { params }
-        = { params: {} }
-    } = props
+    async componentDidMount(): Promise<void> {
+        const { action, match: { params } = { params: {} } } = this.props;
 
-    useEffect(() => {
-        const getAction = async () => {
-            switch (action) {
-            case LoginActions.Login:
-                await login({ returnUrl: getReturnUrl({}) });
-                break;
-            case LoginActions.LoginCallback:
-                await processLoginCallback();
-                break;
-            case LoginActions.LoginFailed:
-                const error = params[QueryParameterNames.Message];
-                setMessage(error)
-                break;
-            case LoginActions.Profile:
-                redirectToProfile();
-                break;
-            case LoginActions.Register:
-                redirectToRegister();
-                break;
-            default:
-                throw new Error(`Invalid action '${action}'`);
-            }
-        }
-
-        getAction()
-    }, [])
-
-    async function login({ returnUrl }: { returnUrl: string }) {
-        const state = { returnUrl };
-        const result: { status: string, message?: string, state?: object } = await authorizationService.signIn({ state });
-        switch (result.status) {
-        case AuthenticationResultStatus.Redirect:
+        switch (action) {
+        case LoginActions.Login:
+            await this.login(this.getReturnUrl());
             break;
-        case AuthenticationResultStatus.Success:
-            navigateToReturnUrl({ returnUrl });
+        case LoginActions.LoginCallback:
+            await this.processLoginCallback();
             break;
-        case AuthenticationResultStatus.Fail:
-            setMessage(result.message);
+        case LoginActions.LoginFailed:
+            const error = params[QueryParameterNames.Message];
+            this.setState({ message: error });
+            break;
+        case LoginActions.Profile:
+            this.redirectToProfile();
+            break;
+        case LoginActions.Register:
+            this.redirectToRegister();
             break;
         default:
-            throw new Error(`Invalid status result ${result.status}.`);
-        }
-    }
-
-    async function processLoginCallback() {
-        const url = window.location.href;
-        const result: { status: string, message?: string, state?: { returnUrl?: string } } = await authorizationService.completeSignIn({ url });
-        switch (result.status) {
-        case AuthenticationResultStatus.Redirect:
-            // There should not be any redirects as the only time completeSignIn finishes
-            // is when we are doing a redirect sign in flow.
-            throw new Error("Should not redirect.");
-        case AuthenticationResultStatus.Success:
-            const { state = { returnUrl: undefined } } = result
-            navigateToReturnUrl({ returnUrl: getReturnUrl(state) });
             break;
-        case AuthenticationResultStatus.Fail:
-            setMessage(result.message)
-            break;
-        default:
-            throw new Error(`Invalid authentication result status '${result.status}'.`);
         }
     }
 
-    function getReturnUrl({ returnUrl }: { returnUrl?: string }) {
-        if (QueryParameterNames.ReturnUrl in params) {
-            if (!params[QueryParameterNames.ReturnUrl].startsWith(`${window.location.origin}/`)) {
-                throw new Error("Invalid return url. The return url needs to have the same origin as the current page.")
-            }
-        }
-
-        return returnUrl || params[QueryParameterNames.ReturnUrl] || `${window.location.origin}/`;
+    redirectToRegister(): void {
+        this.redirectToApiAuthorizationPath(
+            `${OidcPaths.IdentityRegisterPath}?${
+                QueryParameterNames.ReturnUrl
+            }=${encodeURI(OidcPaths.Login)}`
+        );
     }
 
-    function redirectToRegister() {
-        redirectToApiAuthorizationPath({ apiAuthorizationPath: `${OidcPaths.IdentityRegisterPath}?${QueryParameterNames.ReturnUrl}=${encodeURI(OidcPaths.Login)}` });
+    redirectToProfile(): void {
+        this.redirectToApiAuthorizationPath(OidcPaths.IdentityManagePath);
     }
 
-    function redirectToProfile() {
-        redirectToApiAuthorizationPath({ apiAuthorizationPath: OidcPaths.IdentityManagePath });
-    }
-
-    function redirectToApiAuthorizationPath({ apiAuthorizationPath }: { apiAuthorizationPath: string }) {
+    redirectToApiAuthorizationPath(apiAuthorizationPath: string): void {
         const redirectUrl =
-            apiAuthorizationPath.includes(OidcPaths.IdentityRegisterPath) || apiAuthorizationPath.includes(OidcPaths.IdentityManagePath)
-                ? `${hostnames.auth}/${apiAuthorizationPath}` : `${window.location.origin}/${apiAuthorizationPath}`;
-        // It's important that we do a replace here so that when the user hits the back arrow on the
-        // browser they get sent back to where it was on the app instead of to an endpoint on this
-        // component.
-        window.location.replace(redirectUrl)
-        // history.replace(redirectUrl);
+            apiAuthorizationPath.includes(OidcPaths.IdentityRegisterPath) ||
+            apiAuthorizationPath.includes(OidcPaths.IdentityManagePath)
+                ? `${hostnames.auth}/${apiAuthorizationPath}`
+                : `${window.location.origin}/${apiAuthorizationPath}`;
+
+        this.navigateToReturnUrl(redirectUrl);
     }
 
-    function navigateToReturnUrl({ returnUrl }: { returnUrl: string }) {
-        // It's important that we do a replace here so that we remove the callback uri with the
-        // fragment containing the tokens from the browser history.
-        window.location.replace(returnUrl)
-        // history.replace(returnUrl);
+    async login(returnUrl: string): Promise<void> {
+        const state = { returnUrl };
+        const result = await authorizationService.signIn(state);
+
+        switch (result.status) {
+        case AuthorizationStatus.Redirect:
+            break;
+        case AuthorizationStatus.Success:
+            this.navigateToReturnUrl(returnUrl);
+            break;
+        case AuthorizationStatus.Fail:
+            this.setState({ message: result.message ?? "" });
+        }
     }
-    
-    return (
-        <Center w={"100vw"} h={"100vh"}>
-            <VStack spacing={4}>
-                <Spinner size="xl" />
-                <Heading>Processing login</Heading>
-                <Text>{message ?? "This may take up to a minute"}</Text>
-            </VStack>
-        </Center>
-    )
+
+    async processLoginCallback(): Promise<void> {
+        const result = await authorizationService.completeSignIn(
+            window.location.href
+        );
+        switch (result.status) {
+        case AuthorizationStatus.Redirect:
+            throw new Error("Should not redirect.");
+        case AuthorizationStatus.Success:
+            const { returnUrl } = result.state ?? {};
+            const url = this.getReturnUrl(returnUrl);
+            this.navigateToReturnUrl(url);
+            break;
+        case AuthorizationStatus.Fail:
+            this.setState({ message: result.message ?? "" });
+            break;
+        default:
+            throw new Error(
+                `Invalid authentication result status '${result.status}'.`
+            );
+        }
+    }
+
+    getReturnUrl(returnUrl?: string): string {
+        const { match } = this.props;
+        if (match && QueryParameterNames.ReturnUrl in match.params) {
+            if (
+                !match.params[QueryParameterNames.ReturnUrl].startsWith(
+                    `${window.location.origin}/`
+                )
+            ) {
+                throw new Error(
+                    "Invalid return url. The return url needs to have the same origin as the current page."
+                );
+            }
+        }
+
+        return (
+            returnUrl ||
+            (match && match.params[QueryParameterNames.ReturnUrl]) ||
+            `${window.location.origin}/`
+        );
+    }
+
+    navigateToReturnUrl(returnUrl: string): void {
+        window.location.replace(returnUrl);
+    }
+
+    render(): React.ReactNode {
+        return (
+            <Center w={"100vw"} h={"100vh"}>
+                <VStack spacing={4}>
+                    <Spinner size="xl" />
+                    <Heading>Processing login</Heading>
+                    <Text>
+                        {this.state.message ?? "This may take up to a minute"}
+                    </Text>
+                </VStack>
+            </Center>
+        );
+    }
 }
+
+export default withRouter(Login);

@@ -1,15 +1,15 @@
-import * as React from "react"
+import * as React from "react";
 import { Route, Switch } from "react-router-dom";
-import { AuthorizedRoute } from "../oidc/AuthorizedRoute"
 import { OidcPaths } from "../oidc/AuthorizationConstants";
 
-import { LandingRoutes } from "./LandingRoutes";
-import { WebAppRoutes } from "./WebAppRoutes";
-import { AuthorizationRoutes } from "./AuthorizationRoutes";
+import AuthorizedRoute from "../oidc/AuthorizedRoute";
+import LandingRoutes from "./LandingRoutes";
+import WebAppRoutes from "./WebAppRoutes";
+import AuthorizationRoutes from "./AuthorizationRoutes";
 
-import { NotFound } from "../pages/exceptions/NotFound";
+import NotFound from "../pages/exceptions/NotFound";
 
-const Routes = () => {
+const Routes = (): React.ReactElement => {
     return (
         <Switch>
             <Route exact path={"/"} component={LandingRoutes}/>
@@ -18,7 +18,7 @@ const Routes = () => {
 
             <Route component={NotFound}/>
         </Switch>
-    )
-}
+    );
+};
 
-export default Routes
+export default Routes;

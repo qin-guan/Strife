@@ -7,8 +7,12 @@ export interface OidcConfigResponse {
     userStore?: WebStorageStateStore;
 }
 
-export const client = {
-    get: async ({ clientConfigPath }: {clientConfigPath: string}) => {
-        return await authClient.get(clientConfigPath).json<OidcConfigResponse>()
-    }
-}
+export const get = async (path: string): Promise<OidcConfigResponse> => {
+    return await authClient.get(path).json<OidcConfigResponse>();
+};
+
+const oidc = {
+    get
+};
+
+export default oidc;

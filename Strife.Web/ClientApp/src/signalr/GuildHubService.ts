@@ -3,8 +3,8 @@ import * as signalR from "@microsoft/signalr";
 
 import authorizationService from "../oidc/AuthorizationService";
 
-import { IGuild } from "../models/guild/Guild";
-import { guilds } from "../api/http/Guilds";
+import { GuildInstance } from "../models/guild/Guild";
+import { find } from "../api/http/Guilds";
 
 export const GuildContracts = {
     Commands: {},
@@ -16,12 +16,11 @@ export const GuildContracts = {
 export class GuildHubService {
   _connection?: signalR.HubConnection;
 
-  async ensureConnectionExists() {
+  async ensureConnectionExists(): Promise<void> {
       if (this._connection !== undefined) return;
       this._connection = new signalR.HubConnectionBuilder()
           .withUrl(`${hostnames.api}/hubs/guild`, {
-              accessTokenFactory: async () =>
-                  (await authorizationService.getAccessToken()) ?? "",
+              accessTokenFactory: async () => await authorizationService.getAccessToken(),
           })
           .build();
       try {
@@ -32,21 +31,30 @@ export class GuildHubService {
       }
   }
 
-  async getConnection(): Promise<{ connection: signalR.HubConnection }> {
+  async getConnection(): Promise<signalR.HubConnection> {
       await this.ensureConnectionExists();
-      return { connection: this._connection! };
+
+      if (!this._connection) throw new Error("Connection does not exist");
+
+      return this._connection;
   }
 
-  async onGuildCreated(callback: (guild: IGuild) => void) {
-      const { connection } = await this.getConnection();
+  async onGuildCreated(callback: (guild: GuildInstance) => void): Promise<void> {
+      const connection = await this.getConnection();
 
       connection.on(GuildContracts.Events.GuildCreated, async (id: string) => {
-          const guild = await guilds.find({ id });
+          const guild = await find(id);
           callback(guild);
       });
   }
 
-  static get instance() {
+  async close(): Promise<void> {
+      const connection = await this.getConnection();
+      await connection.stop();
+      this._connection = undefined;
+  }
+
+  static get instance(): GuildHubService {
       return guildHubService;
   }
 }

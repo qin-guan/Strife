@@ -21,7 +21,7 @@ export const apiClient = ky.create({
             async (request, _options, response) => {
                 if (response.status !== 401) return;
 
-                await authorizationService.signIn({ state: {} });
+                await authorizationService.signIn({});
                 return ky(request);
             },
         ],

@@ -1,31 +1,28 @@
-﻿import * as React from "react"
+import * as React from "react";
 import { useEffect, useState } from "react";
-import { Box, Flex, Spacer, Button, Heading, Menu, MenuItem, MenuList, MenuButton } from "@chakra-ui/react"
-import { ChevronDownIcon } from "@chakra-ui/icons"
+import { Box, Flex, Spacer, Button, Heading, Menu, MenuItem, MenuList, MenuButton } from "@chakra-ui/react";
+import { ChevronDownIcon } from "@chakra-ui/icons";
 import { NavLink } from "react-router-dom";
 
-import authorizationService from "../../oidc/AuthorizationService"
+import authorizationService from "../../oidc/AuthorizationService";
 import { OidcPaths } from "../../oidc/AuthorizationConstants";
 import { hostnames } from "../../api/http/Base";
 
-export const LandingNavBar = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
-    const [userName, setUserName] = useState<string>()
+const LandingNavBar = (): React.ReactElement => {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     
-    const subscriptionId = authorizationService.subscribe({ callback: () => populateState() });
+    const subscriptionId = authorizationService.subscribe(populateState);
 
     useEffect(() => {
         populateState();
 
         return () => {
-            authorizationService.unsubscribe({ subscriptionId })
-        }
-    }, [subscriptionId])
+            authorizationService.unsubscribe(subscriptionId);
+        };
+    }, [subscriptionId]);
 
     async function populateState() {
-        const [isAuthenticated, user] = await Promise.all([authorizationService.isAuthenticated(), authorizationService.getUser()])
-        setIsAuthenticated(isAuthenticated)
-        user && setUserName(user.name)
+        setIsAuthenticated(await authorizationService.isAuthenticated());
     }
 
     return (
@@ -68,5 +65,7 @@ export const LandingNavBar = () => {
                 )}
             </Box>
         </Flex>
-    )
-}
+    );
+};
+
+export default LandingNavBar;

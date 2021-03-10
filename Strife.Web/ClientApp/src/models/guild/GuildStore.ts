@@ -1,11 +1,11 @@
 import { flow, types } from "mobx-state-tree";
 
-import { Guild, IGuild } from "./Guild";
-import { Status } from "../status/Status"
+import { Guild, GuildInstance } from "./Guild";
+import { Status } from "../status/Status";
 
-import { guilds as guildApi } from "../../api/http/Guilds";
+import { get } from "../../api/http/Guilds";
 
-export const GuildStore = types
+const GuildStore = types
     .model({
         guilds: types.array(Guild),
         createGuildModalOpen: types.boolean,
@@ -14,20 +14,20 @@ export const GuildStore = types
     })
     .actions((self) => ({
         fetchGuilds: flow(function* () {
-            self.guildSidebarStatus = "loading"
+            self.guildSidebarStatus = "loading";
             try {
-                const data = yield guildApi.get();
+                const data = yield get();
 
-                self.guilds = data
-                self.guildSidebarStatus = "done"
+                self.guilds = data;
+                self.guildSidebarStatus = "done";
             } catch (error) {
-                console.error("Failed to load guilds", error)
-                self.guildSidebarStatus = "error"
+                console.error("Failed to load guilds", error);
+                self.guildSidebarStatus = "error";
             } 
         }),
 
-        addGuild: function ({ guild }: {guild: IGuild}) {
-            self.guilds.push(guild)
+        addGuild: function (guild: GuildInstance) {
+            self.guilds.push(guild);
         },
 
         openCreateGuildModal: function () {
@@ -37,3 +37,5 @@ export const GuildStore = types
             self.createGuildModalOpen = false;
         }
     }));
+
+export default GuildStore;
