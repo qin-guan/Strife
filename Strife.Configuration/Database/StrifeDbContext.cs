@@ -13,7 +13,11 @@ namespace Strife.Configuration.Database
     public class StrifeDbContext : StrifeApiAuthorizationDbContext<StrifeUser, GuildRole, Guid>
     {
         public DbSet<Guild.Guild> Guilds { get; set; }
+        public DbSet<Channel.Channel> Channels { get; set; }
+        public DbSet<Message.Message> Messages { get; set; }
+
         public DbSet<GuildStrifeUser> GuildStrifeUser { get; set; }
+
         public StrifeDbContext(
             DbContextOptions options,
             IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
@@ -23,7 +27,7 @@ namespace Strife.Configuration.Database
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            
+
             modelBuilder.Entity<Guild.Guild>()
                 .HasMany(g => g.Users)
                 .WithMany(u => u.Guilds)

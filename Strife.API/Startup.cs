@@ -59,7 +59,7 @@ namespace Strife.API
                     builder => builder.MigrationsAssembly("Strife.Configuration")));
             services.AddDatabaseDeveloperPageExceptionFilter();
 
-            services.AddMassTransitCore();
+            services.AddMassTransitRabbitMq(RabbitMqOptions);
 
             services.AddIdentityCore<StrifeUser>()
                 .AddEntityFrameworkStores<StrifeDbContext>();
@@ -98,7 +98,6 @@ namespace Strife.API
 
             services.AddScoped<AddUserDataServiceFilter>();
             services.AddScoped<IGuildService, GuildService>();
-            services.AddScoped<IUserService, UserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

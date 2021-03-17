@@ -8,7 +8,5 @@ namespace Strife.Configuration.Guild
     public class GuildRole : IdentityRole<Guid>
     {
         public Guild Guild { get; set; }
-
-        public ICollection<StrifeUser> Users { get; set; }
     }
 }

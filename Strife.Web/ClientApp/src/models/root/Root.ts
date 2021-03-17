@@ -2,15 +2,24 @@ import { useContext, createContext } from "react";
 import { types, Instance, onSnapshot } from "mobx-state-tree";
 
 import GuildStore from "../guild/GuildStore";
+import ChannelStore from "../channel/ChannelStore";
+import UserStore from "../user/UserStore";
 
 const Root = types.model({
-    guildStore: GuildStore
+    guildStore: GuildStore,
+    channelStore: ChannelStore,
+    userStore: UserStore
 });
 
 let initialState = Root.create({
     guildStore: {
-        createGuildModalOpen: false,
         guilds: [],
+    },
+    channelStore: {
+        channels: []
+    },
+    userStore: {
+        users: []
     }
 });
 

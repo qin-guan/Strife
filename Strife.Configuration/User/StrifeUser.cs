@@ -11,8 +11,8 @@ namespace Strife.Configuration.User
     {
         [PersonalData]
         public string DisplayName { get; set; }
+
         public ICollection<Guild.Guild> Guilds { get; set; }
         public List<GuildStrifeUser> GuildStrifeUsers { get; set; }
-        public ICollection<GuildRole> Roles { get; set; }
     }
 }

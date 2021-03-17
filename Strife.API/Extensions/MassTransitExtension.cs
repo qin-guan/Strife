@@ -1,24 +1,32 @@
+using System;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
-using Strife.API.Consumers.Guild;
+using Strife.API.Consumers.Commands.Guild;
+using Strife.API.Consumers.Events.Guild;
+using Strife.API.Contracts.Commands.Guild;
+using Strife.Configuration.RabbitMQ;
 
 namespace Strife.API.Extensions
 {
     public static class MassTransitExtension
     {
-        public static IServiceCollection AddMassTransitCore(this IServiceCollection services)
+        public static IServiceCollection AddMassTransitRabbitMq(this IServiceCollection services, RabbitMqOptions rabbitMqOptions)
         {
             services.AddMassTransit(busConfig =>
             {
-                busConfig.AddConsumer<CreateGuildConsumer>();
-                
+                busConfig.AddConsumersFromNamespaceContaining<CreateGuildConsumer>();
+                busConfig.AddConsumersFromNamespaceContaining<GuildCreatedConsumer>();
+
                 // If you would like to use another bus, configure it here
-                busConfig.UsingInMemory((context, config) =>
+                busConfig.UsingRabbitMq((context, config) =>
                 {
-                    config.ReceiveEndpoint("guild-events", endpointConfig =>
+                    config.Host(rabbitMqOptions.Host, "/", h =>
                     {
-                        endpointConfig.ConfigureConsumer<CreateGuildConsumer>(context);
+                        h.Username(rabbitMqOptions.Username);
+                        h.Password(rabbitMqOptions.Password);
                     });
+
+                    config.ConfigureEndpoints(context);
                 });
             });
             services.AddMassTransitHostedService();

@@ -1,6 +1,5 @@
 import * as React from "react";
-import { observer } from "mobx-react";
-import { useMst } from "../../models/root/Root";
+import { cast } from "mobx-state-tree";
 import {
     Modal,
     ModalOverlay,
@@ -19,19 +18,18 @@ import guilds from "../../api/http/Guilds";
 
 const guildNameRegex = /^[a-z0-9]+$/i;
 
-const CreateGuildModal = observer(() => {
-    const {
-        guildStore: { createGuildModalOpen, closeCreateGuildModal },
-    } = useMst();
+export interface CreateGuildModalProps {
+    isOpen: boolean,
+    onClose: () => void
+}
 
+const CreateGuildModal = (props: CreateGuildModalProps): React.ReactElement => {
+    const { isOpen, onClose } = props;
+    
     const [guildName, setGuildName] = React.useState("");
     const [creatingGuild, setCreatingGuild] = React.useState(false);
 
     const initialRef = React.useRef(null);
-
-    const onClose = () => {
-        closeCreateGuildModal();
-    };
 
     const onGuildCreate = async () => {
         setCreatingGuild(true);
@@ -55,7 +53,7 @@ const CreateGuildModal = observer(() => {
     return (
         <Modal
             initialFocusRef={initialRef}
-            isOpen={createGuildModalOpen}
+            isOpen={isOpen}
             onClose={onClose}
             isCentered
         >
@@ -90,6 +88,6 @@ const CreateGuildModal = observer(() => {
             </ModalContent>
         </Modal>
     );
-});
+};
 
 export default CreateGuildModal;

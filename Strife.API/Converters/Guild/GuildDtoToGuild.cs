@@ -11,10 +11,10 @@ namespace Strife.API.Converters
     {
         public Guild Convert(GuildDto source, Guild destination, ResolutionContext context)
         {
-            Guid.TryParse(source.Id, out var guid);
+            var isValidGuid = Guid.TryParse(source.Id, out var guid);
             return new Guild
             {
-                Id = guid,
+                Id = isValidGuid ? guid : Guid.NewGuid(),
                 Name = source.Name,
             };
         }

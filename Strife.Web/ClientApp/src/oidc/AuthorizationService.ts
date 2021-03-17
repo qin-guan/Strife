@@ -54,7 +54,12 @@ export class AuthorizationService {
 
       const user = await this._userManager?.getUser();
 
-      if (!user) throw new Error("User does not exist");
+      if (!user) {
+          const { status } = await this.signIn({});
+          if (status === AuthorizationStatus.Fail) throw new Error("Could not sign in");
+
+          return await this.getUserProfile();
+      }
 
       return user.profile;
   }
@@ -64,7 +69,12 @@ export class AuthorizationService {
 
       const user = await this._userManager?.getUser();
 
-      if (!user) throw new Error("User does not exist");
+      if (!user) {
+          const { status } = await this.signIn({});
+          if (status === AuthorizationStatus.Fail) throw new Error("Could not sign in");
+
+          return await this.getAccessToken();
+      }
 
       return user.access_token;
   }

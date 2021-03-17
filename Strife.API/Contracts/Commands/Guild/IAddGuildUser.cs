@@ -1,10 +1,11 @@
 using System;
 
-namespace Strife.API.Contracts.Events.Guild
+namespace Strife.API.Contracts.Commands.Guild
 {
-    public interface IGuildCreated
+    public interface IAddGuildUser
     {
         public Guid GuildId { get; }
+        
         public Guid InitiatedBy { get; }
     }
 }

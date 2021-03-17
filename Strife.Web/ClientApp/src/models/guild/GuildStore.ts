@@ -8,7 +8,6 @@ import { get } from "../../api/http/Guilds";
 const GuildStore = types
     .model({
         guilds: types.array(Guild),
-        createGuildModalOpen: types.boolean,
 
         guildSidebarStatus: types.optional(Status, "empty")
     })
@@ -26,16 +25,9 @@ const GuildStore = types
             } 
         }),
 
-        addGuild: function (guild: GuildInstance) {
+        add: function (guild: GuildInstance) {
             self.guilds.push(guild);
         },
-
-        openCreateGuildModal: function () {
-            self.createGuildModalOpen = true;
-        },
-        closeCreateGuildModal: function () {
-            self.createGuildModalOpen = false;
-        }
     }));
 
 export default GuildStore;

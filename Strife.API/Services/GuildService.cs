@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Strife.Configuration.Guild;
 using Strife.Configuration.Database;
 using Strife.API.Interfaces;
+using Strife.Configuration.Joins;
 
 namespace Strife.API.Services
 {
@@ -20,7 +21,7 @@ namespace Strife.API.Services
             _context = context;
         }
 
-        public async Task<Guild> FindAsync(Guid guildId)
+        public async Task<Guild> FindByIdAsync(Guid guildId)
         {
             return await _context.Guilds.FindAsync(guildId);
         }
@@ -40,5 +41,24 @@ namespace Strife.API.Services
             await _context.SaveChangesAsync();
             return newGuild.Entity;
         }
+        
+        public async Task<GuildStrifeUser> AddUserAsync(Guid guildId, Guid userId)
+        {
+            var guilds = _context.GuildStrifeUser.Where(gsu => gsu.UserId == userId).ToList();
+            var sequence = !guilds.Any() ? 0 : guilds.Max(g => g.Sequence);
+
+            var join = new GuildStrifeUser 
+            {
+                UserId = userId,
+                GuildId = guildId,
+                Sequence = sequence + 1
+            };
+
+            var newJoin = await _context.GuildStrifeUser.AddAsync(join);
+            await _context.SaveChangesAsync();
+
+            return newJoin.Entity;
+        }
+
     }
 }

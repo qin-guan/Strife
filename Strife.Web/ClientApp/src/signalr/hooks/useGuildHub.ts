@@ -5,20 +5,16 @@ import guildHubService from "../../signalr/GuildHubService";
 
 const useGuildHub = (): void => {
     const {
-        guildStore: { addGuild }
+        guildStore: { add }
     } = useMst();
 
     React.useEffect(() => {
-        guildHubService.onGuildCreated((guild) => {
-            addGuild(guild);
-        });
+        guildHubService.onGuildCreated(add);
 
         return () => {
             guildHubService.close();
-
-            console.log("unmounted");
         };
-    }, [addGuild]);
+    }, [add]);
 };
 
 export default useGuildHub;

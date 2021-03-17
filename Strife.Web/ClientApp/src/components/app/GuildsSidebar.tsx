@@ -5,19 +5,20 @@ import { AddIcon } from "@chakra-ui/icons";
 import { useMst } from "../../models/root/Root";
 import { GuildInstance } from "../../models/guild/Guild";
 
-const GuildsSidebar = observer(() => {
+export interface GuildsSidebarProps {
+    onClickCreateGuild: () => void
+}
+
+const GuildsSidebar = (props: GuildsSidebarProps) => {
+    const { onClickCreateGuild } = props;
     const bg = useColorModeValue("gray.200", "gray.900");
     const {
-        guildStore: { fetchGuilds, openCreateGuildModal, guilds }
+        guildStore: { fetchGuilds, guilds }
     } = useMst();
 
     React.useEffect(() => {
         fetchGuilds();
     }, [fetchGuilds]);
-
-    const onClickCreateGuildAvatar = () => {
-        openCreateGuildModal();
-    };
 
     return (
         <Box bg={bg} px={2} style={{ overflowY: "scroll" }}>
@@ -37,11 +38,11 @@ const GuildsSidebar = observer(() => {
                     icon={<AddIcon/>}
                     style={{ cursor: "pointer" }}
 
-                    onClick={onClickCreateGuildAvatar}
+                    onClick={onClickCreateGuild}
                 />
             </Box>
         </Box>
     );
-});
+};
 
-export default GuildsSidebar;
+export default observer(GuildsSidebar);
