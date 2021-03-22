@@ -1,7 +1,9 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 
+using Strife.API.Policies;
 using Strife.API.Extensions;
 using Strife.API.Interfaces;
 using Strife.API.Services;
@@ -24,6 +27,7 @@ using Strife.Configuration.Hostname;
 using Strife.Configuration.RabbitMQ;
 using Strife.Configuration.Swagger;
 using Strife.Configuration.User;
+using Strife.Configuration.Guild;
 
 namespace Strife.API
 {
@@ -62,6 +66,8 @@ namespace Strife.API
             services.AddMassTransitRabbitMq(RabbitMqOptions);
 
             services.AddIdentityCore<StrifeUser>()
+                .AddRoles<GuildRole>()
+                .AddRoleManager<RoleManager<GuildRole>>()
                 .AddEntityFrameworkStores<StrifeDbContext>();
 
             // Add identity services
@@ -92,12 +98,17 @@ namespace Strife.API
                         };
                     });
 
+            services.AddAuthorization();
+
             services.AddAutoMapper(typeof(Strife.API.Profiles.GuildProfile));
 
             services.AddSingleton<IUserIdProvider, NameIdUserIdProvider>();
 
             services.AddScoped<AddUserDataServiceFilter>();
             services.AddScoped<IGuildService, GuildService>();
+
+            services.AddScoped<IAuthorizationHandler, HasPolicyHandler>();
+            services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -108,7 +119,7 @@ namespace Strife.API
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
 
-                app.UseCors(config => 
+                app.UseCors(config =>
                     config
                         .AllowAnyHeader()
                         .AllowAnyMethod()

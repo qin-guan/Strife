@@ -8,5 +8,6 @@ namespace Strife.API.Interfaces
 {
     public interface IRoleService
     {
+        public Task CreateGuildDefaultsAsync(Guid guildId);
     }
 }

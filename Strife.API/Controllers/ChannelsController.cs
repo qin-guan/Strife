@@ -24,20 +24,28 @@ namespace Strife.API.Controllers
     [Route("[controller]")]
     public class ChannelsController : ControllerBase
     {
+        private readonly IAuthorizationService _authorizationService;
+        private readonly UserManager<StrifeUser> _userManager;
+
         private readonly IGuildService _guildService;
         private readonly IPublishEndpoint _publishEndpoint;
 
-        private readonly UserManager<StrifeUser> _userManager;
         private readonly IMapper _mapper;
 
-        public ChannelsController(IPublishEndpoint publishEndpoint, UserManager<StrifeUser> userManager, IMapper mapper, IGuildService guildService)
+        public ChannelsController(
+            IAuthorizationService authorizationService,
+            UserManager<StrifeUser> userManager,
+            IPublishEndpoint publishEndpoint,
+            IMapper mapper,
+            IGuildService guildService
+        )
         {
+            _authorizationService = authorizationService;
             _publishEndpoint = publishEndpoint;
             _userManager = userManager;
             _mapper = mapper;
 
             _guildService = guildService;
         }
-        
     }
 }

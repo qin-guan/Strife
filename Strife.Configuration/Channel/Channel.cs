@@ -11,6 +11,7 @@ namespace Strife.Configuration.Channel
 
         public string GroupName { get; set; }
 
+        public Guid GuildId { get; set; }
         public Guild.Guild Guild { get; set; }
 
         public List<Message.Message> Messages { get; set; }

@@ -9,6 +9,7 @@ namespace Strife.Configuration.Message
         public DateTime DateSent { get; set; }
         public DateTime DateEdited { get; set; }
 
+        public Guid SenderId { get; set; }
         public User.StrifeUser Sender { get; set; }
 
         public Channel.Channel Channel { get; set; }
