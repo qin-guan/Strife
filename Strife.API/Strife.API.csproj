@@ -19,7 +19,6 @@
   <ItemGroup>
     <Folder Include="Contracts\Commands" />
     <Folder Include="Contracts\Events" />
-    <Folder Include="Producers\Guild" />
     <Folder Include="Services" />
   </ItemGroup>
 
