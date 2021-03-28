@@ -23,7 +23,7 @@ namespace Strife.API.Filters
             if (context.HttpContext.User.HasClaim(claim => claim.Type == ClaimTypes.NameIdentifier))
             {
                 var user = await _userManager.FindByIdAsync(
-                    context.HttpContext.User.Claims.Single<Claim>(claim =>
+                    context.HttpContext.User.Claims.Single(claim =>
                         claim.Type == ClaimTypes.NameIdentifier
                     ).Value
                 );

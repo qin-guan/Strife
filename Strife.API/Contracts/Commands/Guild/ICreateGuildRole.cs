@@ -7,7 +7,9 @@ namespace Strife.API.Contracts.Commands.Guild
     {
         public Guid GuildId { get; }
         public string Name { get; }
+        public bool InternalRole { get; }
         public IEnumerable<string> Policies { get; }
+        public int AccessLevel { get; }
         public Guid InitiatedBy { get; }
     }
 }

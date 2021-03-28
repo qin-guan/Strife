@@ -35,7 +35,13 @@ const CreateGuildModal = (props: CreateGuildModalProps): React.ReactElement => {
         setCreatingGuild(true);
 
         try {
-            await guilds.add({ Name: guildName, Id: "" });
+            await guilds.add({ 
+                Name: guildName,
+                Id: "",
+                Channels: cast([]),
+                Users: cast([]),
+                Roles: cast([])
+            });
 
             setGuildName("");
             onClose();

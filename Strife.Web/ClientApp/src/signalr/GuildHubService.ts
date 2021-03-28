@@ -4,14 +4,16 @@ import * as signalR from "@microsoft/signalr";
 import authorizationService from "../oidc/AuthorizationService";
 
 import { GuildInstance } from "../models/guild/Guild";
-import { find } from "../api/http/Guilds";
+import { find, subscribe } from "../api/http/Guilds";
 
 import { UserInstance } from "../models/user/User";
+import { RoleInstance } from "../models/role/Role";
 
 
 export const GuildEvents = {
     GuildCreated: "Guild/Created",
-    GuildUserAdded: "Guild/UserAdded"
+    GuildUserAdded: "Guild/UserAdded",
+    GuildRoleCreated: "Guild/RoleCreated"
 };
 
 export class GuildHubService {
@@ -44,7 +46,8 @@ export class GuildHubService {
         const connection = await this.getConnection();
 
         connection.on(GuildEvents.GuildCreated, async (id: string) => {
-            const guild = await find(id);
+            if (!connection.connectionId) throw new Error("Connection does not exist");
+            const [_, guild] = await Promise.all([subscribe(id, connection.connectionId), find(id)]);
             callback(guild);
         });
     }
@@ -54,6 +57,14 @@ export class GuildHubService {
 
         connection.on(GuildEvents.GuildUserAdded, async (userId: string) => {
             console.log(`${userId} joined guild`);
+        });
+    }
+    
+    async onGuildRoleCreated(callback: (role: RoleInstance) => void): Promise<void> {
+        const connection = await this.getConnection();
+        
+        connection.on(GuildEvents.GuildRoleCreated, async (roleName: string) => {
+            console.log(`${roleName} created in guild`);
         });
     }
 

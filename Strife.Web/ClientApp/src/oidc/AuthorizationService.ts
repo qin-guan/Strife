@@ -41,8 +41,13 @@ export class AuthorizationService {
   async isAuthenticated(): Promise<boolean> {
       await this.ensureUserManagerInitialized();
       
-      const user = await this.getUserProfile();
-      return !!user;
+      try {
+          const user = await this.getUserProfile();
+          
+          return !!user;
+      } catch {
+          return false;
+      }
   }
 
   async getUserProfile(): Promise<Profile> {
@@ -55,10 +60,7 @@ export class AuthorizationService {
       const user = await this._userManager?.getUser();
 
       if (!user) {
-          const { status } = await this.signIn({});
-          if (status === AuthorizationStatus.Fail) throw new Error("Could not sign in");
-
-          return await this.getUserProfile();
+          throw new Error("User does not exist");
       }
 
       return user.profile;
@@ -162,7 +164,7 @@ export class AuthorizationService {
 
           return { status: AuthorizationStatus.Success, state };
       } catch (popupError) {
-          console.error("Pupup signout error: ", popupError);
+          console.error("Popup signout error: ", popupError);
 
           try {
               await this._userManager?.signoutRedirect({
@@ -224,7 +226,7 @@ export class AuthorizationService {
       }
   }
 
-  static get instace(): AuthorizationService {
+  static get instance(): AuthorizationService {
       return authService;
   }
 }

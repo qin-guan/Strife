@@ -12,19 +12,17 @@ const GuildStore = types
         guildSidebarStatus: types.optional(Status, "empty")
     })
     .actions((self) => ({
-        fetchGuilds: flow(function* () {
+        fetch: flow(function* () {
             self.guildSidebarStatus = "loading";
             try {
-                const data = yield get();
-
-                self.guilds = data;
+                self.guilds = yield get();
                 self.guildSidebarStatus = "done";
             } catch (error) {
                 console.error("Failed to load guilds", error);
                 self.guildSidebarStatus = "error";
             } 
         }),
-
+        
         add: function (guild: GuildInstance) {
             self.guilds.push(guild);
         },

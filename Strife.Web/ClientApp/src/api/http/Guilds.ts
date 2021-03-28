@@ -14,10 +14,16 @@ export const add = async (guild: GuildInstance): Promise<GuildInstance> => {
     return await apiClient.post("Guilds", { json: guild }).json();
 };
 
+export const subscribe = async (id: string, connectionId: string): Promise<void> => {
+    await apiClient.post(`Guilds/${id}/Subscribe`, { json: { ConnectionId: connectionId } });
+    return;
+};
+
 const guilds = {
     get,
     find,
-    add
+    add,
+    subscribe
 };
 
 export default guilds;

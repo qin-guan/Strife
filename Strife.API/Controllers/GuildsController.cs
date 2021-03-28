@@ -9,13 +9,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using MassTransit;
 using AutoMapper;
-
+using MassTransit.Saga;
+using Microsoft.AspNetCore.Http;
 using Strife.API.Policies;
 using Strife.API.Interfaces;
 using Strife.API.Filters;
 using Strife.API.DTOs;
 using Strife.API.Contracts.Commands.Guild;
-
+using Strife.API.Contracts.Events.Guild;
+using Strife.API.DTOs.Guild;
 using Strife.Configuration.User;
 using Strife.Configuration.Guild;
 
@@ -92,7 +94,7 @@ namespace Strife.API.Controllers
 
             return Ok();
         }
-
+        
         [HttpPost]
         [ServiceFilter(typeof(AddUserDataServiceFilter))]
         public async Task<ActionResult<GuildDto>> CreateGuild(GuildDto guildDto)
@@ -102,48 +104,36 @@ namespace Strife.API.Controllers
 
             var guild = _mapper.Map<GuildDto, Guild>(guildDto);
 
-            var endpoints = await Task.WhenAll(new List<Task<ISendEndpoint>>
-            {
-                _sendEndpointProvider.GetSendEndpoint(new Uri("queue:CreateGuild")),
-                _sendEndpointProvider.GetSendEndpoint(new Uri("queue:CreateGuildRole")),
-                _sendEndpointProvider.GetSendEndpoint(new Uri("queue:AddGuildUser"))
-            });
+            var createGuildEndpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri("queue:CreateGuild"));
 
-            await endpoints[0].Send<ICreateGuild>(new
+            await createGuildEndpoint.Send<ICreateGuild>(new
             {
                 GuildId = guild.Id,
                 Name = guild.Name,
                 InitiatedBy = user.Id,
             });
 
-            await Task.WhenAll(new List<Task>
+            return Ok(_mapper.Map<Guild, GuildDto>(guild));
+        }
+
+        [HttpPost("{guildId}/Subscribe")]
+        [ServiceFilter(typeof(AddUserDataServiceFilter))]
+        public async Task<ActionResult> Subscribe([FromRoute] string guildId, SubscribeGuildDto subscribeGuildDto)
+        {
+            var parsable = Guid.TryParse(guildId, out var guid);
+            if (!parsable) return BadRequest();
+
+            var user = (StrifeUser) HttpContext.Items["StrifeUser"];
+            Debug.Assert(user != null, nameof(user) + " != null");
+
+            await _publishEndpoint.Publish<IGuildSubscribedByUser>(new
             {
-                endpoints[1].Send<ICreateGuildRole>(new
-                {
-                        GuildId = guild.Id,
-                        Name = "everyone",
-                        Policies = new List<string>
-                            {
-                                GuildPolicies.CreateChannels,
-                                GuildPolicies.ReadChannels,
-                                GuildPolicies.UpdateChannels,
-                                GuildPolicies.DeleteChannels,
-                            },
-                        InitiatedBy = user.Id
-                }),
-                endpoints[1].Send<ICreateGuildRole>(new
-                {
-                    GuildId = guild.Id,
-                    Name = "__owner",
-                }),
-                endpoints[2].Send<IAddGuildUser>(new
-                {
-                    GuildId = guild.Id,
-                    InitiatedBy = user.Id
-                })
+                ConnectionId = subscribeGuildDto.ConnectionId,
+                guildId = guid,
+                InitiatedBy = user.Id
             });
 
-            return Ok(_mapper.Map<Guild, GuildDto>(guild));
+            return Ok();
         }
     }
 }

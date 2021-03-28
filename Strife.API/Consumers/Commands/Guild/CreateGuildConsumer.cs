@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using MassTransit;
 using MassTransit.Saga;
@@ -23,6 +24,8 @@ namespace Strife.API.Consumers.Commands.Guild
                 Id = context.Message.GuildId,
                 Name = context.Message.Name
             });
+
+            Console.WriteLine("Added User");
 
             await context.Publish<IGuildCreated>(new
             {

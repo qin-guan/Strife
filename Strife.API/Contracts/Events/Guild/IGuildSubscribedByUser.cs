@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 
 namespace Strife.API.Contracts.Events.Guild
 {
-    public interface IGuildRoleCreated
+    public interface IGuildSubscribedByUser
     {
-        public string RoleName { get; }
+        public string ConnectionId { get; }
         public Guid GuildId { get; }
         public Guid InitiatedBy { get; }
     }

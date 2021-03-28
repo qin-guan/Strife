@@ -30,13 +30,12 @@ namespace Strife.API.Policies
             var roles = await Task.WhenAll((await _userManager.GetRolesAsync(user)).Select(_roleManager.FindByNameAsync));
             var claims = (await Task.WhenAll(roles.Select(_roleManager.GetClaimsAsync))).SelectMany(i => i).Select(claim => claim.Type);
 
+            // For example, the policy name might be `Guild/CreateChannels`
             var split = requirement.PolicyName.Split("/");
             var requiredClaim = $"{split[0]}/{resourceId}/{split[1]}";
 
             if (claims.Contains(requiredClaim))
                 context.Succeed(requirement);
-                
-            return;
         }
     }
 }

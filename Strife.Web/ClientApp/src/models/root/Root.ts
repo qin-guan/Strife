@@ -4,11 +4,13 @@ import { types, Instance, onSnapshot } from "mobx-state-tree";
 import GuildStore from "../guild/GuildStore";
 import ChannelStore from "../channel/ChannelStore";
 import UserStore from "../user/UserStore";
+import RoleStore from "../role/RoleStore";
 
 const Root = types.model({
     guildStore: GuildStore,
     channelStore: ChannelStore,
-    userStore: UserStore
+    userStore: UserStore,
+    roleStore: RoleStore
 });
 
 let initialState = Root.create({
@@ -20,6 +22,9 @@ let initialState = Root.create({
     },
     userStore: {
         users: []
+    },
+    roleStore: {
+        roles: []
     }
 });
 
