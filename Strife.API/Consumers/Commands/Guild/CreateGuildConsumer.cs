@@ -25,8 +25,6 @@ namespace Strife.API.Consumers.Commands.Guild
                 Name = context.Message.Name
             });
 
-            Console.WriteLine("Added User");
-
             await context.Publish<IGuildCreated>(new
             {
                 GuildId = context.Message.GuildId,
