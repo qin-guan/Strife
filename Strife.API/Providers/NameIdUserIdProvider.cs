@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.SignalR;
@@ -8,7 +9,8 @@ namespace Strife.API.Providers
     {
         public string GetUserId(HubConnectionContext connection)
         {
-            return connection.User.Claims.Single<Claim>(claim => claim.Type == ClaimTypes.NameIdentifier).Value;
+            Debug.Assert(connection.User != null, "connection.User != null");
+            return connection.User.Claims.Single(claim => claim.Type == ClaimTypes.NameIdentifier).Value;
         }
     }
 }

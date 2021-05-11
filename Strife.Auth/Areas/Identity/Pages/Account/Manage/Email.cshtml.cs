@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using Strife.Configuration.User;
+using Strife.Core.Users;
 
 namespace Strife.Auth.Areas.Identity.Pages.Account.Manage
 {

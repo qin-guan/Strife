@@ -6,11 +6,11 @@ import { NavLink } from "react-router-dom";
 
 import authorizationService from "../../oidc/AuthorizationService";
 import { OidcPaths } from "../../oidc/AuthorizationConstants";
-import { hostnames } from "../../api/http/Base";
+import { hostnames } from "../../api/http/base";
 
 const LandingNavBar = (): React.ReactElement => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    
+
     const subscriptionId = authorizationService.subscribe(populateState);
 
     useEffect(() => {

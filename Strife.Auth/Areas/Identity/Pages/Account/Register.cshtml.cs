@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
-using Strife.Configuration.User;
+using Strife.Core.Users;
 
 namespace Strife.Auth.Areas.Identity.Pages.Account
 {

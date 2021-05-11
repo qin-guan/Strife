@@ -1,4 +1,4 @@
-@using Strife.Configuration.User
+@using Strife.Core.Users
 @inject SignInManager<StrifeUser> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();

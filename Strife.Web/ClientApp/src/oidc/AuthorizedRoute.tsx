@@ -6,7 +6,7 @@ import { Heading, Center, Spinner, VStack } from "@chakra-ui/react";
 import { OidcPaths, QueryParameterNames } from "./AuthorizationConstants";
 import authorizationService from "./AuthorizationService";
 
-const AuthorizedRoute = (parentProps: {component: React.ComponentType<RouteComponentProps<Record<string, string>>>, path: string}): React.ReactElement => {
+const AuthorizedRoute = (parentProps: {component: React.ComponentType<RouteComponentProps>, path: string}): React.ReactElement => {
     const [ready, setReady] = React.useState(false);
     const [authenticated, setAuthenticated] = React.useState(false);
 

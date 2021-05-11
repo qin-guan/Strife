@@ -1,13 +1,11 @@
 using System;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
-
-using Strife.API.Consumers.Commands.Guild;
-using Strife.API.Consumers.Events.Guild;
-using Strife.API.Contracts.Commands.Guild;
+using Strife.API.Consumers.Commands.Guilds;
+using Strife.API.Consumers.Events.Guilds;
 using Strife.API.Sagas.StateMachines;
 using Strife.API.Sagas.States;
-using Strife.Configuration.RabbitMQ;
+using Strife.Core.RabbitMQ;
 
 namespace Strife.API.Extensions
 {
@@ -17,8 +15,7 @@ namespace Strife.API.Extensions
         {
             services.AddMassTransit(busConfig =>
             {
-                busConfig.AddConsumersFromNamespaceContaining<CreateGuildConsumer>();
-                busConfig.AddConsumersFromNamespaceContaining<GuildCreatedConsumer>();
+                busConfig.AddConsumers(typeof(Startup).Assembly);
                 
                 busConfig.AddSagaStateMachine<CreateGuildStateMachine, CreateGuildState>()
                     .InMemoryRepository()

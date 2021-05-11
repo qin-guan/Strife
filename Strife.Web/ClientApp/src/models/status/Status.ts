@@ -1,3 +1,8 @@
-import { types } from "mobx-state-tree";
+export enum Status {
+    Loading,
+    Error,
+    Done,
+    Empty
+}
 
-export const Status = types.enumeration("Status", ["loading", "error", "done", "empty"]);
+export default Status;

@@ -1,10 +1,7 @@
 using System;
 using AutoMapper;
-
-using Strife.API.DTOs;
-using Strife.API.Converters;
-
-using Strife.Configuration.Guild;
+using Strife.API.DTOs.Guilds;
+using Strife.Core.Guilds;
 
 namespace Strife.API.Profiles
 {
@@ -12,8 +9,8 @@ namespace Strife.API.Profiles
     {
         public GuildProfile()
         {
-            CreateMap<Guild, GuildDto>().ConvertUsing<GuildToGuildDto>();
-            CreateMap<GuildDto, Guild>().ConvertUsing<GuildDtoToGuild>();
+            CreateMap<Guild, GuildResponseDto>();
+            CreateMap<CreateGuildRequestDto, Guild>();
         }
     }
 }

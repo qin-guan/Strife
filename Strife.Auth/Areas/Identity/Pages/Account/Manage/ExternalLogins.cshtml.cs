@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Strife.Configuration.User;
+using Strife.Core.Users;
 
 namespace Strife.Auth.Areas.Identity.Pages.Account.Manage
 {

@@ -10,10 +10,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
-using Strife.Configuration.User;
-using Strife.Configuration.Database;
-using Strife.Configuration.Hostname;
-using Strife.Configuration.Swagger;
+using Serilog;
+using Strife.Core.Database;
+using Strife.Core.Hostname;
+using Strife.Core.Swagger;
+using Strife.Core.Users;
 
 namespace Strife.Auth
 {
@@ -45,7 +46,7 @@ namespace Strife.Auth
             // Add database services
             services.AddDbContext<StrifeDbContext>(options =>
                 options.UseNpgsql(StrifeDbOptions.ConnectionString,
-                    builder => builder.MigrationsAssembly("Strife.Configuration")));
+                    builder => builder.MigrationsAssembly("Strife.Core")));
             services.AddDatabaseDeveloperPageExceptionFilter();
 
             // Add identity services 
@@ -78,6 +79,8 @@ namespace Strife.Auth
 
                 app.UseSwaggerCore(new ApiVersion(0, 1, "alpha"), "Strife.Auth");
             }
+
+            app.UseSerilogRequestLogging();
 
             app.UseHttpsRedirection();
 

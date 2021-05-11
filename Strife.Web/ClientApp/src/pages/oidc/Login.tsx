@@ -12,7 +12,7 @@ import authorizationService, {
     AuthorizationStatus,
 } from "../../oidc/AuthorizationService";
 
-import { hostnames } from "../../api/http/Base";
+import { hostnames } from "../../api/http/base";
 
 interface LoginProps extends RouteComponentProps<Record<string, string>> {
     action: string;

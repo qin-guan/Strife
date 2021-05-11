@@ -1,6 +1,6 @@
 import { User, UserManager, WebStorageStateStore, Profile } from "oidc-client";
 
-import { get } from "../api/http/Oidc";
+import { get } from "../api/http/oidc";
 import { ApplicationName, OidcPaths } from "./AuthorizationConstants";
 
 export enum AuthorizationStatus {
@@ -40,10 +40,10 @@ export class AuthorizationService {
 
   async isAuthenticated(): Promise<boolean> {
       await this.ensureUserManagerInitialized();
-      
+
       try {
           const user = await this.getUserProfile();
-          
+
           return !!user;
       } catch {
           return false;
@@ -52,7 +52,7 @@ export class AuthorizationService {
 
   async getUserProfile(): Promise<Profile> {
       await this.ensureUserManagerInitialized();
-    
+
       if (this._user && this._user.profile) {
           return this._user.profile;
       }

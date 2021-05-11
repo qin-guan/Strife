@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strife.Mobile.UITests", "St
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strife.Mobile", "Strife.Mobile\Strife.Mobile.csproj", "{55738F5F-28F3-464F-B6F1-3F69529ED8B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strife.Configuration", "Strife.Configuration\Strife.Configuration.csproj", "{31D4E9AA-1130-46C9-AF6E-FB99ACF285BE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strife.Core", "Strife.Core\Strife.Core.csproj", "{31D4E9AA-1130-46C9-AF6E-FB99ACF285BE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

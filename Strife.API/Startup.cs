@@ -13,21 +13,18 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-
-using Strife.API.Policies;
+using Serilog;
 using Strife.API.Extensions;
-using Strife.API.Interfaces;
-using Strife.API.Services;
-using Strife.API.Filters;
 using Strife.API.Hubs;
+using Strife.API.Permissions;
 using Strife.API.Providers;
 
-using Strife.Configuration.Database;
-using Strife.Configuration.Hostname;
-using Strife.Configuration.RabbitMQ;
-using Strife.Configuration.Swagger;
-using Strife.Configuration.User;
-using Strife.Configuration.Guild;
+using Strife.Core.Database;
+using Strife.Core.Guilds;
+using Strife.Core.Hostname;
+using Strife.Core.RabbitMQ;
+using Strife.Core.Swagger;
+using Strife.Core.Users;
 
 namespace Strife.API
 {
@@ -60,7 +57,7 @@ namespace Strife.API
             // Add database services
             services.AddDbContext<StrifeDbContext>(options =>
                 options.UseNpgsql(StrifeDbOptions.ConnectionString,
-                    builder => builder.MigrationsAssembly("Strife.Configuration")));
+                    builder => builder.MigrationsAssembly("Strife.Core")));
             services.AddDatabaseDeveloperPageExceptionFilter();
 
             services.AddMassTransitRabbitMq(RabbitMqOptions);
@@ -88,7 +85,7 @@ namespace Strife.API
 
                                 var path = context.HttpContext.Request.Path;
                                 if (!string.IsNullOrEmpty(accessToken) &&
-                                    (path.StartsWithSegments("/hubs/guild")))
+                                    (path.StartsWithSegments("/hub")))
                                 {
                                     context.Token = accessToken;
                                 }
@@ -100,14 +97,11 @@ namespace Strife.API
 
             services.AddAuthorization();
 
-            services.AddAutoMapper(typeof(Strife.API.Profiles.GuildProfile));
+            services.AddAutoMapper(typeof(Startup).Assembly);
 
             services.AddSingleton<IUserIdProvider, NameIdUserIdProvider>();
 
-            services.AddScoped<AddUserDataServiceFilter>();
-            services.AddScoped<IGuildService, GuildService>();
-
-            services.AddScoped<IAuthorizationHandler, HasPolicyHandler>();
+            services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
             services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
         }
 
@@ -130,6 +124,8 @@ namespace Strife.API
                 app.UseSwaggerCore(new ApiVersion(0, 1, "alpha"), "Strife.API");
             }
 
+            app.UseSerilogRequestLogging();
+
             app.UseHttpsRedirection();
 
             app.UseRouting();
@@ -141,7 +137,7 @@ namespace Strife.API
             {
                 endpoints.MapControllers();
 
-                endpoints.MapHub<GuildHub>("/hubs/guild");
+                endpoints.MapHub<EventsHub>("/hub");
             });
         }
     }

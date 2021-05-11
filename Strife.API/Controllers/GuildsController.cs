@@ -1,139 +1,144 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
-using System.Text.Json;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using MassTransit;
 using AutoMapper;
-using MassTransit.Saga;
-using Microsoft.AspNetCore.Http;
-using Strife.API.Policies;
-using Strife.API.Interfaces;
-using Strife.API.Filters;
-using Strife.API.DTOs;
-using Strife.API.Contracts.Commands.Guild;
-using Strife.API.Contracts.Events.Guild;
-using Strife.API.DTOs.Guild;
-using Strife.Configuration.User;
-using Strife.Configuration.Guild;
+using Serilog;
+using Strife.API.Attributes;
+using Strife.API.Consumers.Commands.Guilds;
+using Strife.API.Contracts.Commands.Guilds;
+using Strife.API.Contracts.Events.Guilds;
+using Strife.API.Contracts.Events.Hubs;
+using Strife.API.DTOs.Guilds;
+using Strife.Core.Database;
+using Strife.Core.Guilds;
 
 namespace Strife.API.Controllers
 {
     [Authorize]
     [ApiController]
+    [AddStrifeUserId]
     [Route("[controller]")]
     public class GuildsController : ControllerBase
     {
-        public readonly IAuthorizationService _authorizationService;
-        private readonly UserManager<StrifeUser> _userManager;
-
-        private readonly IGuildService _guildService;
+        private readonly IAuthorizationService _authorizationService;
         private readonly IMapper _mapper;
-
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly ISendEndpointProvider _sendEndpointProvider;
+        private readonly StrifeDbContext _dbContext;
 
         public GuildsController(
             IAuthorizationService authorizationService,
-            UserManager<StrifeUser> userManager,
             IPublishEndpoint publishEndpoint,
             IMapper mapper,
-            IGuildService guildService,
-            ISendEndpointProvider sendEndpointProvider
+            ISendEndpointProvider sendEndpointProvider,
+            StrifeDbContext dbContext
         )
         {
             _authorizationService = authorizationService;
-            _userManager = userManager;
-
             _mapper = mapper;
-
-            _guildService = guildService;
-
             _publishEndpoint = publishEndpoint;
             _sendEndpointProvider = sendEndpointProvider;
+            _dbContext = dbContext;
         }
 
         [HttpGet]
-        [ServiceFilter(typeof(AddUserDataServiceFilter))]
-        public async Task<ActionResult<GuildDto[]>> ReadGuilds()
+        public async Task<ActionResult<IEnumerable<GuildResponseDto>>> ReadGuilds()
         {
-            var user = (StrifeUser)HttpContext.Items["StrifeUser"];
-            Debug.Assert(user != null, nameof(user) + " != null");
+            Debug.Assert(HttpContext.Items["StrifeUserId"] != null, "HttpContext.Items['UserId'] != null");
+            var userId = (Guid) HttpContext.Items["StrifeUserId"];
 
-            var guilds = await _guildService.FindByUserIdAsync(user.Id);
+            var guilds = await _dbContext.GuildStrifeUser
+                .Where(gsu => gsu.UserId == userId)
+                .OrderBy(gsu => gsu.Sequence)
+                .Include(gsu => gsu.Guild)
+                .Select(gsu => gsu.Guild)
+                .ToListAsync();
 
-            return Ok(_mapper.Map<IEnumerable<Guild>, IEnumerable<GuildDto>>(guilds));
+            return Ok(_mapper.Map<IEnumerable<GuildResponseDto>>(guilds));
         }
 
-        [HttpGet("{guildId}")]
-        [ServiceFilter(typeof(AddUserDataServiceFilter))]
-        public async Task<ActionResult<GuildDto>> ReadGuild(string guildId)
+        [HttpGet("{guildId:guid}")]
+        public async Task<ActionResult<GuildResponseDto>> ReadGuild(
+            [FromRoute] Guid guildId
+        )
         {
-            var parsable = Guid.TryParse(guildId, out var guid);
-            if (!parsable) return BadRequest();
+            try
+            {
+                var guild = await _dbContext.Guilds.FindAsync(guildId);
+                if (guild is null) return NotFound();
 
-            var guild = await _guildService.FindByIdAsync(guid);
-            return Ok(_mapper.Map<Guild, GuildDto>(guild));
+                return Ok(_mapper.Map<GuildResponseDto>(guild));
+            }
+            catch (Exception exception)
+            {
+                Log.Fatal(exception, "Fatal exception while reading Guild details");
+                return Problem();
+            }
         }
 
-        [HttpGet("{guildId}/Channels")]
-        [ServiceFilter(typeof(AddUserDataServiceFilter))]
-        public async Task<ActionResult<ChannelDto[]>> ReadChannels(string guildId)
-        {
-            var parsable = Guid.TryParse(guildId, out var guid);
-            if (!parsable) return BadRequest();
-
-            var authorizationResult = await _authorizationService
-                .AuthorizeAsync(User, guid, GuildPolicies.ReadChannels);
-
-            if (!authorizationResult.Succeeded) return Forbid();
-
-            return Ok();
-        }
-        
         [HttpPost]
-        [ServiceFilter(typeof(AddUserDataServiceFilter))]
-        public async Task<ActionResult<GuildDto>> CreateGuild(GuildDto guildDto)
+        public async Task<ActionResult<GuildResponseDto>> CreateGuild(
+            [FromBody] CreateGuildRequestDto createGuildRequestDto 
+        )
         {
-            var user = (StrifeUser)HttpContext.Items["StrifeUser"];
-            Debug.Assert(user != null, nameof(user) + " != null");
+            Debug.Assert(HttpContext.Items["StrifeUserId"] != null, "HttpContext.Items['UserId'] != null");
+            var userId = (Guid) HttpContext.Items["StrifeUserId"];
 
-            var guild = _mapper.Map<GuildDto, Guild>(guildDto);
-
-            var createGuildEndpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri("queue:CreateGuild"));
-
-            await createGuildEndpoint.Send<ICreateGuild>(new
+            try
             {
-                GuildId = guild.Id,
-                Name = guild.Name,
-                InitiatedBy = user.Id,
-            });
+                var guild = _mapper.Map<Guild>(createGuildRequestDto);
+                guild.Id = Guid.NewGuid();
 
-            return Ok(_mapper.Map<Guild, GuildDto>(guild));
+                var createGuildEndpoint =
+                    await _sendEndpointProvider.GetSendEndpoint(GuildAddresses.CreateGuildConsumer);
+                
+                await createGuildEndpoint.Send<ICreateGuild>(new
+                {
+                    GuildId = guild.Id,
+                    guild.Name,
+                    InitiatedBy = userId,
+                });
+
+                return Ok(_mapper.Map<GuildResponseDto>(guild));
+            }
+            catch (Exception exception)
+            {
+                Log.Fatal(exception, "Fatal exception while creating Guild");
+                return Problem();
+            }
         }
 
-        [HttpPost("{guildId}/Subscribe")]
-        [ServiceFilter(typeof(AddUserDataServiceFilter))]
-        public async Task<ActionResult> Subscribe([FromRoute] string guildId, SubscribeGuildDto subscribeGuildDto)
+        [HttpPost("{guildId:guid}/Subscribe")]
+        public async Task<ActionResult> Subscribe(
+            [FromRoute] Guid guildId,
+            [FromBody] SubscribeGuildRequestDto subscribeGuildRequestDto
+        )
         {
-            var parsable = Guid.TryParse(guildId, out var guid);
-            if (!parsable) return BadRequest();
+            Debug.Assert(HttpContext.Items["StrifeUserId"] != null, "HttpContext.Items['UserId'] != null");
+            var userId = (Guid) HttpContext.Items["StrifeUserId"];
 
-            var user = (StrifeUser) HttpContext.Items["StrifeUser"];
-            Debug.Assert(user != null, nameof(user) + " != null");
-
-            await _publishEndpoint.Publish<IGuildSubscribedByUser>(new
+            try
             {
-                ConnectionId = subscribeGuildDto.ConnectionId,
-                guildId = guid,
-                InitiatedBy = user.Id
-            });
+                await _publishEndpoint.Publish<IGuildSubscribedByUser>(new
+                {
+                    subscribeGuildRequestDto.ConnectionId,
+                    GuildId = guildId,
+                    InitiatedBy = userId
+                });
 
-            return Ok();
+                return Ok();
+            }
+            catch (Exception exception)
+            {
+                Log.Fatal(exception, "Fatal error while subscribing to Guild");
+                return Problem();
+            }
         }
     }
 }

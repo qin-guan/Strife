@@ -1,55 +1,68 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
-using Strife.Configuration.Database;
+using Microsoft.Extensions.Hosting;
+using Serilog;
+using Serilog.Events;
+using Strife.Core.Database;
 
 namespace Strife.Auth
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            var host = CreateHostBuilder(args).Build();
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .Enrich.FromLogContext()
+                .WriteTo.File("logs.log", rollingInterval: RollingInterval.Day)
+                .WriteTo.Console()
+                .CreateLogger();
 
+            Log.Information("Building host...");
+            var host = CreateHostBuilder(args).Build();
+            Log.Information("Host built");
+            
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
                 var hostingEnvironment = services.GetService<IWebHostEnvironment>();
 
-                CreateDbIfNotExists(host, hostingEnvironment);
+                await CreateDbIfNotExists(host, hostingEnvironment);
             }
 
-            host.Run();
+            await host.RunAsync();
         }
 
-        private static async void CreateDbIfNotExists(IHost host, IWebHostEnvironment env)
+        private static async Task CreateDbIfNotExists(IHost host, IHostEnvironment env)
         {
-            using (var scope = host.Services.CreateScope())
+            using var scope = host.Services.CreateScope();
+            var services = scope.ServiceProvider;
+            try
             {
-                var services = scope.ServiceProvider;
-                try
+                var context = services.GetRequiredService<StrifeDbContext>();
+                Log.Information("Creating Db...");
+                if (env.IsDevelopment())
                 {
-                    var context = services.GetRequiredService<StrifeDbContext>();
-                    if (env.IsDevelopment()) await context.Database.EnsureCreatedAsync();
-                    else await context.Database.MigrateAsync();
+                    await context.Database.EnsureCreatedAsync();
                 }
-                catch (Exception ex)
+                else
                 {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred creating the DB.");
+                    await context.Database.MigrateAsync();
                 }
+                Log.Information("Db created");
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Could not create or run migrations on Db");
             }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .UseSerilog()
                 .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
     }
 }
