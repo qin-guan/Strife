@@ -2,6 +2,6 @@
 {
     public static class ChannelMethods
     {
-        public static string Created = "Channels/Created";
+        public const string Created = "Channels/Created";
     }
 }

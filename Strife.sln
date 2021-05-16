@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strife.Mobile", "Strife.Mob
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strife.Core", "Strife.Core\Strife.Core.csproj", "{31D4E9AA-1130-46C9-AF6E-FB99ACF285BE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strife.API.Tests", "Strife.API.Tests\Strife.API.Tests.csproj", "{7082E1C0-6AE9-434B-B94F-C55955EF0463}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -125,6 +127,18 @@ Global
 		{31D4E9AA-1130-46C9-AF6E-FB99ACF285BE}.Debug|iPhone.Build.0 = Debug|Any CPU
 		{31D4E9AA-1130-46C9-AF6E-FB99ACF285BE}.Release|iPhone.ActiveCfg = Release|Any CPU
 		{31D4E9AA-1130-46C9-AF6E-FB99ACF285BE}.Release|iPhone.Build.0 = Release|Any CPU
+		{7082E1C0-6AE9-434B-B94F-C55955EF0463}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7082E1C0-6AE9-434B-B94F-C55955EF0463}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7082E1C0-6AE9-434B-B94F-C55955EF0463}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7082E1C0-6AE9-434B-B94F-C55955EF0463}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7082E1C0-6AE9-434B-B94F-C55955EF0463}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{7082E1C0-6AE9-434B-B94F-C55955EF0463}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{7082E1C0-6AE9-434B-B94F-C55955EF0463}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{7082E1C0-6AE9-434B-B94F-C55955EF0463}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{7082E1C0-6AE9-434B-B94F-C55955EF0463}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{7082E1C0-6AE9-434B-B94F-C55955EF0463}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{7082E1C0-6AE9-434B-B94F-C55955EF0463}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{7082E1C0-6AE9-434B-B94F-C55955EF0463}.Release|iPhone.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

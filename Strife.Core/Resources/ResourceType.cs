@@ -2,7 +2,6 @@
 {
     public enum ResourceType
     {
-        Guild,
         Role,
         Channel,
         Message

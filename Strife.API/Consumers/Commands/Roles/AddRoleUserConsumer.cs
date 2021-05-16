@@ -22,7 +22,6 @@ namespace Strife.API.Consumers.Commands.Roles
 
         public async Task Consume(ConsumeContext<IAddRoleUser> context)
         {
-            Log.Fatal("nice");
             var role = await _dbContext.Roles.SingleOrDefaultAsync(r =>
                 r.Name == $"Guilds/{context.Message.GuildId}/Roles/{context.Message.RoleName}");
             if (role == default(GuildRole)) throw new Exception("Role was not found");

@@ -7,9 +7,8 @@ using Strife.Core.Resources;
 
 namespace Strife.Core.Channels
 {
-    public class Channel: IResource
+    public class Channel
     {
-        public ResourceType ResourceType => ResourceType.Channel;
         public Guid Id { get; set; }
 
         public string Name { get; set; }

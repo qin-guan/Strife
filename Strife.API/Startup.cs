@@ -102,6 +102,7 @@ namespace Strife.API
             services.AddSingleton<IUserIdProvider, NameIdUserIdProvider>();
 
             services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+            services.AddScoped<IAuthorizationHandler, GuidAndClaimsListAuthorizationHandler>();
             services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
         }
 

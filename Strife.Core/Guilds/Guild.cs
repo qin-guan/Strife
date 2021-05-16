@@ -8,9 +8,8 @@ using Strife.Core.Users;
 
 namespace Strife.Core.Guilds
 {
-    public class Guild: IResource 
+    public class Guild
     {
-        public ResourceType ResourceType => ResourceType.Guild;
         public Guid Id { get; set; }
         public string Name { get; set; }
         public ICollection<StrifeUser> Users { get; set; }

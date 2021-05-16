@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
@@ -24,7 +25,7 @@ namespace Strife.API.Providers
             policy = new AuthorizationPolicyBuilder()
                 .AddRequirements(new PermissionRequirement(policyName))
                 .Build();
-
+            
             _options.AddPolicy(policyName, policy);
 
             return policy;

@@ -13,6 +13,8 @@ import {
 import { AddIcon } from "@chakra-ui/icons";
 
 import channelsApi from "../../../api/http/channels";
+import messagesApi from "../../../api/http/messages";
+
 import CreateChannelModal from "./CreateChannelModal";
 
 import { guildChannels, setToGuild } from "../../../models/channel/ChannelSlice";
@@ -27,8 +29,6 @@ const ChannelsSidebar = (): Nullable<React.ReactElement> => {
     const guildId = useAppSelector(s => s.guild.selectedEntity);
     const channelSlice = useAppSelector(s => s.channel);
     const channels = guildChannels(channelSlice, guildId);
-
-    console.log(channelSlice);
 
     const dispatch = useAppDispatch();
 
@@ -58,6 +58,12 @@ const ChannelsSidebar = (): Nullable<React.ReactElement> => {
         if (!guildId) return;
         fetchChannels();
     }, [guildId, fetchChannels]);
+
+    useEffect(() => {
+        if (!selectedChannelId) return;
+        const { get } = messagesApi(guildId, selectedChannelId);
+        get();
+    }, [selectedChannelId, guildId]);
 
     const groupedChannels = useMemo(() => {
         if (!guildId) return {};

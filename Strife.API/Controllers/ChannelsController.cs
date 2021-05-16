@@ -1,7 +1,8 @@
 using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +15,7 @@ using Strife.API.Attributes;
 using Strife.API.Consumers.Commands.Channels;
 using Strife.API.Contracts.Commands.Channels;
 using Strife.API.DTOs.Channels;
+using Strife.API.Extensions;
 using Strife.API.Permissions;
 using Strife.Core.Database;
 using Strife.Core.Guilds;
@@ -58,17 +60,29 @@ namespace Strife.API.Controllers
             [FromRoute] Guid guildId
         )
         {
+            Debug.Assert(HttpContext.Items["StrifeUserId"] != null, "HttpContext.Items['StrifeUserId'] != null");
+            var userId = (Guid) HttpContext.Items["StrifeUserId"];
+
             try
             {
                 var guild = await _dbContext.Guilds.Include(g => g.Channels).SingleOrDefaultAsync(g => g.Id == guildId);
                 if (guild == default(Guild)) return NotFound();
+                var channels = new List<Channel>();
 
-                var authorization = await _authorizationService.AuthorizeAsync(User, guild,
-                    new Permission(guild.Id, ResourceType.Channel, PermissionAllowDeny.Allow,
-                        PermissionOperationType.Read).ToString());
-                if (!authorization.Succeeded) return Forbid();
+                var roleClaims = await _dbContext.GetClaimsAsync(guild.Id, userId);
+                var guidAndClaimsList = new GuidAndClaimsList(guildId, roleClaims);
 
-                return Ok(_mapper.Map<IEnumerable<ChannelResponseDto>>(guild.Channels));
+                await Task.WhenAll(guild.Channels.Select(async channel =>
+                {
+                    var permission = new Permission(guild.Id, channel.Id, ResourceType.Channel,
+                        PermissionOperationType.Read, PermissionAllowDeny.Allow);
+                    var authorization =
+                        await _authorizationService.AuthorizeAsync(User, guidAndClaimsList,
+                            permission.ToString());
+                    if (authorization.Succeeded) channels.Add(channel);
+                }));
+
+                return Ok(_mapper.Map<IEnumerable<ChannelResponseDto>>(channels));
             }
             catch (Exception exception)
             {
@@ -76,7 +90,7 @@ namespace Strife.API.Controllers
                 return Problem();
             }
         }
-        
+
         [HttpGet("{channelId:guid}")]
         public async Task<ActionResult<ChannelResponseDto>> ReadChannel(
             [FromRoute] Guid guildId,
@@ -88,9 +102,9 @@ namespace Strife.API.Controllers
                 var guild = await _dbContext.Guilds.Include(g => g.Channels).SingleOrDefaultAsync(g => g.Id == guildId);
                 if (guild == default(Guild)) return NotFound();
 
-                var authorization = await _authorizationService.AuthorizeAsync(User, guild,
-                    new Permission(guild.Id, ResourceType.Channel, PermissionAllowDeny.Allow,
-                        PermissionOperationType.Read).ToString());
+                var authorization = await _authorizationService.AuthorizeAsync(User, guild.Id,
+                    new Permission(guild.Id, channelId, ResourceType.Channel, PermissionOperationType.Read,
+                        PermissionAllowDeny.Allow).ToString());
                 if (!authorization.Succeeded) return Forbid();
 
                 var channel = guild.Channels.Find(c => c.Id == channelId);
@@ -116,12 +130,12 @@ namespace Strife.API.Controllers
 
             try
             {
-                var guild = await _dbContext.Guilds.FindAsync(guildId);
-                if (guild is null) return NotFound();
+                var guild = await _dbContext.Guilds.Include(g => g.Channels).SingleOrDefaultAsync(g => g.Id == guildId);
+                if (guild == default(Guild)) return NotFound();
 
-                var authorization = await _authorizationService.AuthorizeAsync(User, guild,
-                    new Permission(guild.Id, ResourceType.Channel, PermissionAllowDeny.Allow,
-                        PermissionOperationType.Create).ToString());
+                var authorization = await _authorizationService.AuthorizeAsync(User, guild.Id,
+                    new Permission(guild.Id, ResourceType.Channel, PermissionOperationType.Create,
+                        PermissionAllowDeny.Allow).ToString());
                 if (!authorization.Succeeded) return Forbid();
 
                 var channel = _mapper.Map<Channel>(createChannelRequestDto);

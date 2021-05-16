@@ -2,7 +2,7 @@
 {
     public static class RoleMethods
     {
-        public static string Created = "Roles/Created";
-        public static string UserAdded = "Roles/UserAdded";
+        public const string Created = "Roles/Created";
+        public const string UserAdded = "Roles/UserAdded";
     }
 }

@@ -2,7 +2,7 @@
 {
     public static class GuildMethods
     {
-        public static string Created = "Guilds/Created";
-        public static string UserAdded = "Guilds/UserAdded";
+        public const string Created = "Guilds/Created";
+        public const string UserAdded = "Guilds/UserAdded";
     }
 }

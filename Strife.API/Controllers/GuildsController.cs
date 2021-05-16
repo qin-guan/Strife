@@ -26,21 +26,18 @@ namespace Strife.API.Controllers
     [Route("[controller]")]
     public class GuildsController : ControllerBase
     {
-        private readonly IAuthorizationService _authorizationService;
         private readonly IMapper _mapper;
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly ISendEndpointProvider _sendEndpointProvider;
         private readonly StrifeDbContext _dbContext;
 
         public GuildsController(
-            IAuthorizationService authorizationService,
             IPublishEndpoint publishEndpoint,
             IMapper mapper,
             ISendEndpointProvider sendEndpointProvider,
             StrifeDbContext dbContext
         )
         {
-            _authorizationService = authorizationService;
             _mapper = mapper;
             _publishEndpoint = publishEndpoint;
             _sendEndpointProvider = sendEndpointProvider;
@@ -50,7 +47,7 @@ namespace Strife.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GuildResponseDto>>> ReadGuilds()
         {
-            Debug.Assert(HttpContext.Items["StrifeUserId"] != null, "HttpContext.Items['UserId'] != null");
+            Debug.Assert(HttpContext.Items["StrifeUserId"] != null, "HttpContext.Items['StrifeUserId'] != null");
             var userId = (Guid) HttpContext.Items["StrifeUserId"];
 
             var guilds = await _dbContext.GuildStrifeUser

@@ -5,9 +5,8 @@ using Strife.Core.Resources;
 
 namespace Strife.Core.Guilds
 {
-    public class GuildRole : IdentityRole<Guid>, IResource
+    public class GuildRole : IdentityRole<Guid>
     {
-        public ResourceType ResourceType => ResourceType.Role;
         public int AccessLevel { get; set; }
         public bool InternalRole { get; set; }
 
