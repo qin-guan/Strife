@@ -18,7 +18,7 @@ namespace Strife.Web
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                 .Enrich.FromLogContext()
-                .WriteTo.File("logs.log", rollingInterval: RollingInterval.Day)
+                .WriteTo.File("Logs/log.log", rollingInterval: RollingInterval.Day)
                 .WriteTo.Console()
                 .CreateLogger();
 

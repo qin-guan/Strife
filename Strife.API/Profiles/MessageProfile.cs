@@ -9,6 +9,7 @@ namespace Strife.API.Profiles
         public MessageProfile()
         {
             CreateMap<Message, MessageResponseDto>();
+            CreateMap<CreateMessageRequestDto, Message>();
         }
     }
 }

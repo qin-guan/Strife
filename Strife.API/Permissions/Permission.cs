@@ -82,10 +82,7 @@ namespace Strife.API.Permissions
                 if (!Enum.TryParse(parsed[4], out ResourceType childResourceType))
                     throw new Exception("Invalid permission string");
 
-                ChildResource = new ChildResource
-                {
-                    ResourceType = childResourceType
-                };
+                ChildResource = new ChildResource(childResourceType);
 
                 if (Guid.TryParse(parsed[5], out var childResourceId))
                     ChildResource.ResourceId = childResourceId;
@@ -113,10 +110,7 @@ namespace Strife.API.Permissions
             }
 
             permissions.AddRange(ops.Select(op =>
-                new Permission(guildId, ResourceType.Channel, op, PermissionAllowDeny.Allow, new ChildResource
-                {
-                    ResourceType = ResourceType.Message
-                })));
+                new Permission(guildId, ResourceType.Channel, op, PermissionAllowDeny.Allow, new ChildResource(ResourceType.Message))));
 
             return permissions;
         }

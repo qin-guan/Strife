@@ -19,11 +19,9 @@
     <Content Remove="$(SpaRoot)**" />
     <None Remove="$(SpaRoot)**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
-    <None Include="ClientApp\src\api\http\messages.ts" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ClientApp\src\store\hooks\" />
     <Folder Include="ClientApp\src\theme\" />
     <Folder Include="ClientApp\src\pages\" />
     <Folder Include="ClientApp\src\components\" />

@@ -1,6 +1,6 @@
 import { apiClient } from "./base";
-import { CreateChannelRequest } from "../models/channels/CreateChannelRequest";
-import { Channel } from "../../models/channel/Channel";
+import { CreateChannelRequest } from "../dtos/channels/CreateChannelRequest";
+import { Channel } from "../../models/Channel";
 
 export interface ChannelsApi {
     get: () => Promise<Channel[]>;

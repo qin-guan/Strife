@@ -7,5 +7,10 @@ namespace Strife.Core.Resources
         public Guid ResourceId { get; set; }
         public bool IsWild => ResourceId == Guid.Empty;
         public ResourceType ResourceType { get; set; }
+
+        public ChildResource(ResourceType resourceType)
+        {
+            ResourceType = resourceType;
+        }
     }
 }

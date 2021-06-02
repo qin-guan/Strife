@@ -35,10 +35,9 @@
     "react-router": "5.2.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.2",
-    "web-vitals": "^1.1.0",
-    "redux": "^4.1.0",
-    "@reduxjs/toolkit": "^1.5.1",
-    "react-redux": "^7.2.4"
+    "react-window": "^1.8.6",
+    "swr": "^0.5.6",
+    "web-vitals": "^1.1.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.11.9",
@@ -49,13 +48,13 @@
     "@types/react": "^17.0.1",
     "@types/react-dom": "^17.0.0",
     "@types/react-router-dom": "^5.1.7",
+    "@types/react-window": "^1.8.3",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
     "eslint": "^7.21.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "typescript": "^4.2.3",
-    "redux-devtools": "^3.7.0"
+    "typescript": "^4.2.3"
   }
 }

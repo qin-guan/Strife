@@ -1,13 +1,15 @@
 ﻿import * as React from "react";
-import { Box, Heading, useColorModeValue } from "@chakra-ui/react";
-import { useAppSelector } from "../../../store/hooks/useAppSelector";
-import { currentGuild } from "../../../models/guild/GuildSlice";
+import { Box, Heading } from "@chakra-ui/react";
+import { useGuild } from "../../../api/swr/guilds";
 
-const GuildBanner = (): Nullable<React.ReactElement> => {
-    const guildSlice = useAppSelector(s => s.guild);
-    const guild = currentGuild(guildSlice);
+export interface GuildBannerProps {
+    selectedGuild: string;
+}
 
-    if (!guild) return null;
+const GuildBanner = (props: GuildBannerProps): Nullable<React.ReactElement> => {
+    const { data: guild, error } = useGuild(props.selectedGuild);
+
+    if (!guild || error) return null;
 
     return (
         <Box px={4} py={2}>

@@ -1,7 +1,7 @@
 import { apiClient } from "./base";
 
-import { CreateGuildRequest } from "../models/guilds/CreateGuildRequest";
-import { Guild } from "../../models/guild/Guild";
+import { CreateGuildRequest } from "../dtos/guilds/CreateGuildRequest";
+import { Guild } from "../../models/Guild";
 
 const get = async (): Promise<Guild[]> => {
     return await apiClient.get("Guilds").json();

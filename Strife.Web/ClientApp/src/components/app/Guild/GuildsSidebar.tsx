@@ -1,25 +1,30 @@
 /** @jsxImportSource @emotion/react */
 
 import * as React from "react";
-import { useCallback, useEffect, useState } from "react";
+import { ReactElement, useState } from "react";
 
-import { Box, Avatar, useColorModeValue, useToast, Flex } from "@chakra-ui/react";
+import { Avatar, Box, Center, SkeletonCircle, Spinner, useColorModeValue, useToast } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 
-import { css, jsx } from "@emotion/react";
+import { css } from "@emotion/react";
 
 import guildsApi from "../../../api/http/guilds";
-import CreateGuildModal from "./CreateGuildModal";
-import { useAppSelector } from "../../../store/hooks/useAppSelector";
-import { useAppDispatch } from "../../../store/hooks/useAppDispatch";
-import { currentGuild, set, subscribeToGuild, updateCurrent } from "../../../models/guild/GuildSlice";
-import { Guild } from "../../../models/guild/Guild";
+import { useGuilds } from "../../../api/swr/guilds";
+import { Guild } from "../../../models/Guild";
 
-const GuildsSidebar = () => {
-    const guildSlice = useAppSelector(s => s.guild);
-    const { entities: guilds } = guildSlice;
-    const current = currentGuild(guildSlice);
-    const dispatch = useAppDispatch();
+import CreateGuildModal from "./CreateGuildModal";
+import { useSignalRHub, SignalRHubMethods } from "../../../signalr/useSignalRHub";
+import { HubConnectionState } from "@microsoft/signalr";
+
+export interface GuildsSidebarProps {
+    selectedGuild: Nullable<string>;
+    onChangeSelectedGuild: (guildId: string) => void;
+}
+
+const GuildsSidebar = (props: GuildsSidebarProps): Nullable<ReactElement> => {
+    const { selectedGuild, onChangeSelectedGuild } = props;
+    const { data: guilds, error, mutate } = useGuilds();
+    const { connectionState, connectionId } = useSignalRHub(SignalRHubMethods.Guild.Created, mutate);
 
     const [createGuildModalOpen, setCreateGuildModalOpen] = useState(false);
 
@@ -28,24 +33,20 @@ const GuildsSidebar = () => {
 
     const toast = useToast();
 
-    const fetchGuilds = useCallback(async () => {
-        try {
-            const guilds = await guildsApi.get();
-            dispatch(set(guilds));
-        } catch {
-            toast({
-                title: "Unknown exception",
-                description: "An unknown exception occurred while fetching your servers",
-                status: "error",
-                isClosable: true,
-            });
-        }
-    }, [dispatch, toast]);
+    if (error) {
+        toast({
+            title: "Unknown exception",
+            description: "An unknown exception occurred while fetching your servers",
+            status: "error",
+            isClosable: true,
+        });
+        return null;
+    }
 
-    useEffect(() => {
-        fetchGuilds();
-    }, [fetchGuilds]);
-
+    if (!connectionId || connectionState !== HubConnectionState.Connected) {
+        return <Spinner/>;
+    }
+    
     const openCreateGuildModal = (): void => {
         setCreateGuildModalOpen(true);
     };
@@ -69,22 +70,24 @@ const GuildsSidebar = () => {
                 display: none;
               }
             `}>
-                {guilds.map((guild: Guild, idx: number) => (
+                {guilds ? guilds.map((guild: Guild, idx: number) => (
                     <Box py={2} key={idx.toString()}>
                         <Avatar
                             size="md"
                             name={guild.Name}
                             cursor={"pointer"}
                             borderColor={borderColor}
-                            showBorder={current && guild.Id === current.Id}
+                            showBorder={selectedGuild === guild.Id}
 
-                            onClick={() => {
-                                dispatch(subscribeToGuild(guild.Id));
-                                dispatch(updateCurrent(guild));
+                            onClick={async () => {
+                                await guildsApi.subscribe(guild.Id, connectionId);
+                                onChangeSelectedGuild(guild.Id);
                             }}
                         />
                     </Box>
-                ))}
+                )) : (
+                    <SkeletonCircle/>
+                )}
                 <Box py={2}>
                     <Avatar
                         size="md"
@@ -98,5 +101,6 @@ const GuildsSidebar = () => {
         </>
     );
 };
+
 
 export default GuildsSidebar;
