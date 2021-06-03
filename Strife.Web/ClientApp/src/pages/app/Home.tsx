@@ -19,6 +19,11 @@ const Home = (): React.ReactElement => {
     const [selectedGuild, setSelectedGuild] = useState<Nullable<string>>(null);
     const [selectedChannel, setSelectedChannel] = useState<Nullable<string>>(null);
     
+    const onChangeSelectedGuild = (guildId: string) => {
+        setSelectedGuild(guildId);
+        setSelectedChannel(null);
+    };
+    
     return (
         <SignalRHubContext.Provider value={{
             connection: new signalR.HubConnectionBuilder()
@@ -29,7 +34,7 @@ const Home = (): React.ReactElement => {
             started: useRef(false),
         }}>
             <Flex w="100%" h="100%">
-                <GuildsSidebar selectedGuild={selectedGuild} onChangeSelectedGuild={setSelectedGuild}/>
+                <GuildsSidebar selectedGuild={selectedGuild} onChangeSelectedGuild={onChangeSelectedGuild}/>
                 {selectedGuild && (
                     <>
                         <Flex direction={"column"} w={80}>

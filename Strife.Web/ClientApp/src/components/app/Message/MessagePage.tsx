@@ -1,7 +1,12 @@
 import * as React from "react";
 import { CSSProperties, memo } from "react";
-import { Message as MessageModel } from "../../../models/Message";
+
+import { Box, Flex } from "@chakra-ui/react";
+import { areEqual } from "react-window";
+
 import { useMessages } from "../../../api/swr/messages";
+
+import Message from "./Message";
 
 export interface MessagePageProps {
     selectedGuild: string;
@@ -12,21 +17,19 @@ export interface MessagePageProps {
 
 const MessagePage = (props: MessagePageProps) => {
     const { selectedGuild, selectedChannel, page, style } = props;
-    const { data , error } = useMessages(selectedGuild, selectedChannel, page);
-    
+    const { data, error } = useMessages(selectedGuild, selectedChannel, page);
+
     if (!data) {
         return <>Loading...</>;
     }
-    
+
     return (
-        <div style={style}>
-            {[...data.reverse()].map((message, idx) => (
-                <>
-                    {message ? <div key={idx.toString()}>{message.Content}</div> : <div style={{ height: 24, width: 100, backgroundColor: "gray" }}/>}
-                </>
+        <Box style={style}>
+            {data.map((message, idx) => (
+                <Message key={idx} content={message.Content} user={message.SenderId}/>
             ))}
-        </div>
+        </Box>
     );
 };
 
-export default memo(MessagePage);
+export default memo(MessagePage, areEqual);
