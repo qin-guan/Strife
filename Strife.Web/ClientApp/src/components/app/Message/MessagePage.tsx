@@ -1,12 +1,14 @@
 import * as React from "react";
 import { CSSProperties, memo } from "react";
 
-import { Box, Flex } from "@chakra-ui/react";
+import { Box, Flex, Spinner, useToast } from "@chakra-ui/react";
 import { areEqual } from "react-window";
 
 import { useMessages } from "../../../api/swr/messages";
 
 import Message from "./Message";
+import { SignalRHubMethods, useSignalRHub } from "../../../signalr/useSignalRHub";
+import { HubConnectionState } from "@microsoft/signalr";
 
 export interface MessagePageProps {
     selectedGuild: string;
@@ -17,10 +19,23 @@ export interface MessagePageProps {
 
 const MessagePage = (props: MessagePageProps) => {
     const { selectedGuild, selectedChannel, page, style } = props;
-    const { data, error } = useMessages(selectedGuild, selectedChannel, page);
+    const { data, error, mutate } = useMessages(selectedGuild, selectedChannel, page);
+    const { connectionState, connectionId } = useSignalRHub(SignalRHubMethods.Message.Created, () => mutate());
+    
+    const toast = useToast();
+    
+    if (error) {
+        toast({
+            title: "Unknown exception",
+            description: "An unknown exception occurred while fetching your messages",
+            status: "error",
+            isClosable: true,
+        });
+        return null;
+    }
 
-    if (!data) {
-        return <>Loading...</>;
+    if (!connectionId || connectionState !== HubConnectionState.Connected || !data) {
+        return <Spinner/>;
     }
 
     return (

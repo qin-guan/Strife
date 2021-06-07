@@ -18,13 +18,13 @@ import { HubConnectionState } from "@microsoft/signalr";
 
 export interface GuildsSidebarProps {
     selectedGuild: Nullable<string>;
-    onChangeSelectedGuild: (guildId: string) => void;
+    onSubscribedToGuild: (guildId: string) => void;
 }
 
 const GuildsSidebar = (props: GuildsSidebarProps): Nullable<ReactElement> => {
-    const { selectedGuild, onChangeSelectedGuild } = props;
+    const { selectedGuild, onSubscribedToGuild } = props;
     const { data: guilds, error, mutate } = useGuilds();
-    const { connectionState, connectionId } = useSignalRHub(SignalRHubMethods.Guild.Created, mutate);
+    const { connectionState, connectionId } = useSignalRHub(SignalRHubMethods.Guild.Created, () => mutate());
 
     const [createGuildModalOpen, setCreateGuildModalOpen] = useState(false);
 
@@ -81,7 +81,7 @@ const GuildsSidebar = (props: GuildsSidebarProps): Nullable<ReactElement> => {
 
                             onClick={async () => {
                                 await guildsApi.subscribe(guild.Id, connectionId);
-                                onChangeSelectedGuild(guild.Id);
+                                onSubscribedToGuild(guild.Id);
                             }}
                         />
                     </Box>

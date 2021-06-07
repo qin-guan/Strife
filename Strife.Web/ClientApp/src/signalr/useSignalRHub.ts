@@ -1,4 +1,4 @@
-import { HubConnectionState } from "@microsoft/signalr";
+import { HubConnection, HubConnectionState } from "@microsoft/signalr";
 import { useContext, useEffect, useState } from "react";
 import { SignalRHubContext } from "./SignalRHubContext";
 
@@ -19,10 +19,13 @@ export const SignalRHubMethods = {
     Channel: {
         Created: "Channels/Created"
     },
+    Message: {
+        Created: "Messages/Created"
+    }
 };
 
 export const useSignalRHub = (method: string, callback: (...args: any[]) => void): SignalRHubResponse => {
-    const { connection, started } = useContext(SignalRHubContext);
+    const { connection: { current: connection }, started } = useContext(SignalRHubContext);
     const [connectionState, setConnectionState] = useState(connection.state);
     const [connectionId, setConnectionId] = useState<Nullable<string>>(null);
     
@@ -48,10 +51,14 @@ export const useSignalRHub = (method: string, callback: (...args: any[]) => void
             });
             started.current = true;
         }
+        
+        if (!connectionId && connection.connectionId) {
+            setConnectionId(connection.connectionId);
+        }
     }, [connection, started, method, callback]);
 
     return {
         connectionState,
-        connectionId
+        connectionId,
     };
 };

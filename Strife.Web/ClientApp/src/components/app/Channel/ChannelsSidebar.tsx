@@ -1,25 +1,16 @@
 ﻿import * as React from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
-import {
-    Box,
-    Flex,
-    Heading,
-    HStack,
-    IconButton,
-    Tag,
-    Text,
-    useToast
-} from "@chakra-ui/react";
+import { Box, Flex, Heading, HStack, IconButton, Spinner, Tag, Text, useToast } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 
 import { css } from "@emotion/react";
-
-import channelsApi from "../../../api/http/channels";
 import { Channel } from "../../../models/Channel";
 
 import CreateChannelModal from "./CreateChannelModal";
 import { useChannels } from "../../../api/swr/channels";
+import { SignalRHubMethods, useSignalRHub } from "../../../signalr/useSignalRHub";
+import { HubConnectionState } from "@microsoft/signalr";
 
 export interface ChannelsSidebarProps {
     selectedGuild: string;
@@ -29,7 +20,9 @@ export interface ChannelsSidebarProps {
 
 const ChannelsSidebar = (props: ChannelsSidebarProps): Nullable<React.ReactElement> => {
     const { selectedGuild, selectedChannel, onChangeSelectedChannel } = props;
-    const { data: channels, error } = useChannels(selectedGuild);
+    const { data: channels, error, mutate } = useChannels(selectedGuild);
+
+    const { connectionState, connectionId } = useSignalRHub(SignalRHubMethods.Channel.Created, () => mutate());
 
     const [createChannelModalOpen, setCreateChannelModalOpen] = useState(false);
 
@@ -55,6 +48,12 @@ const ChannelsSidebar = (props: ChannelsSidebarProps): Nullable<React.ReactEleme
             isClosable: true,
         });
         return null;
+    }
+
+    if (!connectionId || connectionState !== HubConnectionState.Connected) {
+        return (
+            <Spinner/>
+        );
     }
 
     const openCreateChannelModal = () => setCreateChannelModalOpen(true);

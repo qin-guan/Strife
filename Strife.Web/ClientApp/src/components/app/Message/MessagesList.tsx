@@ -1,7 +1,7 @@
 import * as React from "react";
-import { createRef, FC, ReactElement, useEffect, useRef, useState } from "react";
+import { createRef, FC, useEffect, useState } from "react";
 
-import { Center, Flex, Heading, Spinner, Tag, useToast } from "@chakra-ui/react";
+import { Center, Heading, Spinner, Tag, useToast } from "@chakra-ui/react";
 import { VariableSizeList, VariableSizeList as List } from "react-window";
 
 import { useChannelMeta } from "../../../api/swr/channels";
@@ -16,8 +16,14 @@ export interface MessagesListProps {
 export const MessagesList: FC<MessagesListProps> = (props) => {
     const { selectedGuild, selectedChannel } = props;
     const { data: meta, error } = useChannelMeta(selectedGuild, selectedChannel);
-    const [pageCount, setPageCount] = useState(2);
+    const [pageCount, setPageCount] = useState(1);
+    const [firstRender, setFirstRender] = useState(true);
     const messageListRef = createRef<VariableSizeList>();
+    
+    useEffect(() => {
+        setPageCount(1);
+        setFirstRender(true);
+    }, [selectedChannel]);
 
     const toast = useToast();
 
@@ -54,32 +60,41 @@ export const MessagesList: FC<MessagesListProps> = (props) => {
             messageListRef.current && messageListRef.current.scrollToItem(2, "start");
         }
     };
+    const onItemsRendered = () => {
+        if (!firstRender) return;
+        setFirstRender(false);
+        messageListRef.current && messageListRef.current.scrollToItem(1, "start");
+    };
 
     return (
-        <List
-            ref={messageListRef}
-            width={"calc(100vw - 384px)"}
-            itemSize={getItemSize}
-            itemCount={pageCount + 1}
-            height={window.innerHeight}
-            onScroll={onScroll}
-        >
-            {({ index, style }) => {
-                if (index === 0) {
-                    return (
-                        <Center style={{ height: 300 }}>
-                            <Tag size={"lg"} variant="solid" colorScheme="teal">
+        <>
+            <List
+                ref={messageListRef}
+                width={"calc(100vw - 384px)"}
+                itemSize={getItemSize}
+                itemCount={pageCount + 1}
+                height={window.innerHeight - 48}
+                onScroll={onScroll}
+                onItemsRendered={onItemsRendered}
+            >
+                {({ index, style }) => {
+                    if (index === 0) {
+                        return (
+                            <Center style={{ height: 300 }}>
+                                <Tag size={"lg"} variant="solid" colorScheme="teal">
                                 No more messages :(
-                            </Tag>
-                        </Center>
+                                </Tag>
+                            </Center>
+                        );
+                    }
+                    return (
+                        <MessagePage style={style} selectedGuild={selectedGuild}
+                            selectedChannel={selectedChannel} page={meta?.PageCount - pageCount + index}/>
                     );
-                }
-                return (
-                    <MessagePage style={style} selectedGuild={selectedGuild}
-                        selectedChannel={selectedChannel} page={pageCount - index}/>
-                );
-            }}
-        </List>
+                }}
+            </List>
+            {pageCount}
+        </>
     );
 };
 

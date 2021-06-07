@@ -54,7 +54,7 @@ namespace Strife.API.Controllers
         public async Task<ActionResult<ChannelMetaResponseDto>> ReadMessages(
             [FromRoute] Guid guildId,
             [FromRoute] Guid channelId,
-            [FromQuery] [Range(0, int.MaxValue)] int page = 0,
+            [FromQuery] [Range(1, int.MaxValue)] int page = 1,
             [FromQuery] [Range(1, int.MaxValue)] int count = 30
         )
         {
@@ -69,9 +69,13 @@ namespace Strife.API.Controllers
                 if (!authorization.Succeeded) return Forbid();
 
                 var messages = await _dbContext.Messages.Where(m => m.ChannelId == channelId)
-                    .OrderByDescending(m => m.DateSent)
-                    .Skip(page * count).Take(count).ToListAsync();
-                messages.Reverse();
+                    .OrderBy(m => m.DateSent)
+                    .Skip((page - 1) * count).Take(count).ToListAsync();
+                
+                // var messages = await _dbContext.Messages.Where(m => m.ChannelId == channelId)
+                //     .OrderByDescending(m => m.DateSent)
+                //     .Skip(page * count).Take(count).ToListAsync();
+                // messages.Reverse();
 
                 return Ok(_mapper.Map<IEnumerable<MessageResponseDto>>(messages));
             }

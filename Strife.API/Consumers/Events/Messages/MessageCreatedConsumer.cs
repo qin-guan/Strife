@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR;
 using Strife.API.Contracts.Events.Messages;

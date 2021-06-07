@@ -5,15 +5,17 @@ import { hostnames } from "../api/http/base";
 import authorizationService from "../oidc/AuthorizationService";
 
 export interface ISignalRHubContext {
-    connection: HubConnection;
+    connection: MutableRefObject<HubConnection>;
     started: MutableRefObject<boolean>;
 }
 
 export const SignalRHubContext = createContext<ISignalRHubContext>({
-    connection: new signalR.HubConnectionBuilder()
-        .withUrl(`${hostnames.api}/hub`, {
-            accessTokenFactory: async () => await authorizationService.getAccessToken(),
-        })
-        .build(),
+    connection: {
+        current: new signalR.HubConnectionBuilder()
+            .withUrl(`${hostnames.api}/hub`, {
+                accessTokenFactory: async () => await authorizationService.getAccessToken(),
+            })
+            .build()
+    },
     started: { current: false },
 });
