@@ -22,6 +22,7 @@ using Strife.API.Providers;
 using Strife.Core.Database;
 using Strife.Core.Guilds;
 using Strife.Core.Hostname;
+using Strife.Core.Messages;
 using Strife.Core.RabbitMQ;
 using Strife.Core.Swagger;
 using Strife.Core.Users;
@@ -33,6 +34,7 @@ namespace Strife.API
         public StrifeDbOptions StrifeDbOptions { get; private set; }
         public RabbitMqOptions RabbitMqOptions { get; private set; }
         public HostnameOptions HostnameOptions { get; private set; }
+        public MessageOptions MessageOptions { get; private set; }
         public IConfiguration Configuration { get; }
         public Startup(IConfiguration configuration)
         {
@@ -45,8 +47,10 @@ namespace Strife.API
             StrifeDbOptions = Configuration.GetSection(StrifeDbOptions.StrifeDb).Get<StrifeDbOptions>();
             HostnameOptions = Configuration.GetSection(HostnameOptions.Hostnames).Get<HostnameOptions>();
             RabbitMqOptions = Configuration.GetSection(RabbitMqOptions.RabbitMq).Get<RabbitMqOptions>();
+            MessageOptions = Configuration.GetSection(MessageOptions.Message).Get<MessageOptions>();
 
             services.Configure<HostnameOptions>(Configuration.GetSection(HostnameOptions.Hostnames));
+            services.Configure<MessageOptions>(Configuration.GetSection(MessageOptions.Message));
 
             services.AddControllers()
                     .AddJsonOptions(opts => opts.JsonSerializerOptions.PropertyNamingPolicy = null);

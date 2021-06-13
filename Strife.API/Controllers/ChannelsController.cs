@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using MassTransit;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Strife.API.Attributes;
 using Strife.API.Consumers.Commands.Channels;
@@ -20,6 +21,7 @@ using Strife.API.Extensions;
 using Strife.API.Permissions;
 using Strife.Core.Database;
 using Strife.Core.Guilds;
+using Strife.Core.Messages;
 using Strife.Core.Resources;
 using Strife.Core.Users;
 using Channel = Strife.Core.Channels.Channel;
@@ -38,8 +40,7 @@ namespace Strife.API.Controllers
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly ISendEndpointProvider _sendEndpointProvider;
         private readonly IMapper _mapper;
-
-        private const decimal PageSize = 30;
+        private readonly MessageOptions _messageOptions;
 
         public ChannelsController(
             IAuthorizationService authorizationService,
@@ -47,7 +48,8 @@ namespace Strife.API.Controllers
             StrifeDbContext dbContext,
             IPublishEndpoint publishEndpoint,
             ISendEndpointProvider sendEndpointProvider,
-            IMapper mapper
+            IMapper mapper,
+            IOptions<MessageOptions> messageOptions
         )
         {
             _authorizationService = authorizationService;
@@ -56,8 +58,9 @@ namespace Strife.API.Controllers
             _userManager = userManager;
             _dbContext = dbContext;
             _mapper = mapper;
+            _messageOptions = messageOptions.Value;
         }
-
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ChannelResponseDto>>> ReadChannels(
             [FromRoute] Guid guildId
@@ -138,12 +141,12 @@ namespace Strife.API.Controllers
                         PermissionAllowDeny.Allow, new ChildResource(ResourceType.Message)).ToString());
                 if (!authorization.Succeeded) return Forbid();
 
-                var pageCount = Math.Ceiling(await _dbContext.Messages.Where(m => m.ChannelId == channelId).LongCountAsync()/PageSize);
+                var pageCount = Math.Ceiling(await _dbContext.Messages.Where(m => m.ChannelId == channelId).LongCountAsync()/_messageOptions.PageSize);
 
                 return Ok(new ChannelMetaResponseDto
                 {
-                    PageSize = PageSize,
-                    PageCount = pageCount
+                    PageSize = _messageOptions.PageSize,
+                    PageCount = pageCount == 0 ? 1 : pageCount
                 });
             }
             catch (Exception exception)

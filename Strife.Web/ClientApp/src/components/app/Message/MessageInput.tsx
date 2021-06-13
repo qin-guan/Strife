@@ -3,8 +3,6 @@ import { ChangeEventHandler, FC, KeyboardEventHandler, useState } from "react";
 
 import { Box, Input } from "@chakra-ui/react";
 import messages from "../../../api/http/messages";
-import { useChannelMeta } from "../../../api/swr/channels";
-import { useMessages } from "../../../api/swr/messages";
 
 export interface MessageInputProps {
     selectedGuild: string;
@@ -14,26 +12,16 @@ export interface MessageInputProps {
 export const MessageInput: FC<MessageInputProps> = (props) => {
     const { selectedGuild, selectedChannel } = props;
     const [message, setMessage] = useState("");
-    const { data: meta, error } = useChannelMeta(selectedGuild, selectedChannel);
-    const { mutate } = useMessages(selectedGuild, selectedChannel, meta ? meta.PageCount : 1);
-
-    if (!meta) {
-        return <>Loading</>;
-    }
-
-    if (error) {
-        return <>error</>;
-    }
 
     const { create } = messages(selectedGuild, selectedChannel);
 
     const onKeyPress: KeyboardEventHandler<HTMLInputElement> = async (event) => {
-        if (event.code !== "Enter") {
+        if (event.code !== "Enter" || message.length === 0) {
             return;
         }
-        await create(message);
+
+        create(message);
         setMessage("");
-        mutate();
     };
 
     const onChange: ChangeEventHandler<HTMLInputElement> = (event) => {
@@ -53,5 +41,4 @@ export const MessageInput: FC<MessageInputProps> = (props) => {
             />
         </Box>
     );
-}
-;
+};

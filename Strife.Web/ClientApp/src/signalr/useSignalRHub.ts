@@ -17,14 +17,15 @@ export const SignalRHubMethods = {
         UserAdded: "Roles/UserAdded"
     },
     Channel: {
-        Created: "Channels/Created"
+        Created: "Channels/Created",
+        MetaUpdated: "Channels/MetaUpdated",
     },
     Message: {
         Created: "Messages/Created"
     }
 };
 
-export const useSignalRHub = (method: string, callback: (...args: any[]) => void): SignalRHubResponse => {
+export const useSignalRHub = (method: string, callback: (...args: any[]) => void, usecase?: string): SignalRHubResponse => {
     const { connection: { current: connection }, started } = useContext(SignalRHubContext);
     const [connectionState, setConnectionState] = useState(connection.state);
     const [connectionId, setConnectionId] = useState<Nullable<string>>(null);

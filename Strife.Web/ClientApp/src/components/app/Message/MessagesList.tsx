@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createRef, FC, useEffect, useState } from "react";
+import { createRef, FC, useCallback, useEffect, useRef, useState } from "react";
 
 import { Center, Heading, Spinner, Tag, useToast } from "@chakra-ui/react";
 import { VariableSizeList, VariableSizeList as List } from "react-window";
@@ -7,6 +7,7 @@ import { VariableSizeList, VariableSizeList as List } from "react-window";
 import { useChannelMeta } from "../../../api/swr/channels";
 
 import MessagePage from "./MessagePage";
+import { SignalRHubMethods, useSignalRHub } from "../../../signalr/useSignalRHub";
 
 export interface MessagesListProps {
     selectedGuild: string;
@@ -15,15 +16,35 @@ export interface MessagesListProps {
 
 export const MessagesList: FC<MessagesListProps> = (props) => {
     const { selectedGuild, selectedChannel } = props;
-    const { data: meta, error } = useChannelMeta(selectedGuild, selectedChannel);
+
+    const { data: meta, error, mutate: mutateMeta } = useChannelMeta(selectedGuild, selectedChannel);
+    
+    useSignalRHub(SignalRHubMethods.Channel.MetaUpdated, (_, channelId) => {
+        if (channelId !== selectedChannel) return;
+        mutateMeta();
+    });
+
     const [pageCount, setPageCount] = useState(1);
     const [firstRender, setFirstRender] = useState(true);
+
+    const sizeMap = useRef<Record<number, number>>({});
     const messageListRef = createRef<VariableSizeList>();
-    
+
     useEffect(() => {
         setPageCount(1);
         setFirstRender(true);
     }, [selectedChannel]);
+
+    const setPageHeight = useCallback((page: number, height: number) => {
+        sizeMap.current[page] = height;
+    }, []);
+    const getPageHeight = useCallback((page: number) => {
+        if (!meta?.PageCount || page === 0) {
+            return 300;
+        }
+
+        return sizeMap.current[meta?.PageCount - pageCount + page] ?? 1440;
+    }, [meta, pageCount]);
 
     const toast = useToast();
 
@@ -53,7 +74,6 @@ export const MessagesList: FC<MessagesListProps> = (props) => {
         );
     }
 
-    const getItemSize = (index: number) => index === 0 ? 300 : 1440;
     const onScroll = ({ scrollOffset }: { scrollOffset: number }) => {
         if (scrollOffset < 300 && pageCount < meta.PageCount) {
             setPageCount(p => p + 1);
@@ -71,7 +91,7 @@ export const MessagesList: FC<MessagesListProps> = (props) => {
             <List
                 ref={messageListRef}
                 width={"calc(100vw - 384px)"}
-                itemSize={getItemSize}
+                itemSize={getPageHeight}
                 itemCount={pageCount + 1}
                 height={window.innerHeight - 48}
                 onScroll={onScroll}
@@ -82,14 +102,20 @@ export const MessagesList: FC<MessagesListProps> = (props) => {
                         return (
                             <Center style={{ height: 300 }}>
                                 <Tag size={"lg"} variant="solid" colorScheme="teal">
-                                No more messages :(
+                                    {pageCount < meta.PageCount ? "Loading..." : "No more messages"}
                                 </Tag>
                             </Center>
                         );
                     }
                     return (
-                        <MessagePage style={style} selectedGuild={selectedGuild}
-                            selectedChannel={selectedChannel} page={meta?.PageCount - pageCount + index}/>
+                        <MessagePage
+                            style={style}
+                            selectedGuild={selectedGuild}
+                            selectedChannel={selectedChannel}
+                            page={meta?.PageCount - pageCount + index}
+
+                            setHeight={setPageHeight}
+                        />
                     );
                 }}
             </List>
