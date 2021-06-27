@@ -1,7 +1,19 @@
 ﻿import * as React from "react";
 import { useMemo, useState } from "react";
 
-import { Box, Flex, Heading, HStack, IconButton, Spinner, Tag, Text, useToast } from "@chakra-ui/react";
+import {
+    Box,
+    Flex,
+    Heading,
+    HStack,
+    IconButton,
+    Menu,
+    MenuButton, MenuItem, MenuList,
+    Spinner,
+    Tag,
+    Text,
+    useToast
+} from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 
 import { css } from "@emotion/react";
@@ -98,7 +110,17 @@ const ChannelsSidebar = (props: ChannelsSidebarProps): Nullable<React.ReactEleme
                     ))}
                 </Box>
                 <Box mt={6}>
-                    <IconButton onClick={openCreateChannelModal} aria-label={"Create channel"} icon={<AddIcon/>}/>
+                    <Menu>
+                        <MenuButton as={IconButton} icon={<AddIcon/>} aria-label={"Create"}/>
+                        <MenuList>
+                            <MenuItem>
+                                User
+                            </MenuItem>
+                            <MenuItem onClick={openCreateChannelModal}>
+                                Channel
+                            </MenuItem>
+                        </MenuList>
+                    </Menu>
                 </Box>
             </Flex>
         </>

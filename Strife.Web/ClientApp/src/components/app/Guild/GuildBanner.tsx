@@ -1,6 +1,9 @@
 ﻿import * as React from "react";
-import { Box, Heading } from "@chakra-ui/react";
+import { Flex, Heading, IconButton } from "@chakra-ui/react";
 import { useGuild } from "../../../api/swr/guilds";
+import { SettingsIcon } from "@chakra-ui/icons";
+import { useState } from "react";
+import GuildSettingsModal from "./GuildSettingsModal";
 
 export interface GuildBannerProps {
     selectedGuild: string;
@@ -8,13 +11,20 @@ export interface GuildBannerProps {
 
 const GuildBanner = (props: GuildBannerProps): Nullable<React.ReactElement> => {
     const { data: guild, error } = useGuild(props.selectedGuild);
+    
+    const [settingsOpen, setSettingsOpen] = useState(false);
 
     if (!guild || error) return null;
+    
+    const closeSettings = () => setSettingsOpen(false);
+    const openSettings = () => setSettingsOpen(true);
 
     return (
-        <Box px={4} py={2}>
+        <Flex px={4} py={2} justifyContent={"space-between"} alignItems={"center"}>
+            <GuildSettingsModal isOpen={settingsOpen} onClose={closeSettings}/>
             <Heading size={"md"}>{guild.Name}</Heading>
-        </Box>
+            <IconButton aria-label={"settings"} icon={<SettingsIcon/>} onClick={openSettings}/>
+        </Flex>
     );
 };
 

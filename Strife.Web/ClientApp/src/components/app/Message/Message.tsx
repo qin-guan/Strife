@@ -1,10 +1,10 @@
 import * as React from "react";
 import { FC, memo } from "react";
-import { Avatar, Flex, Tag, TagLabel, Text, useColorModeValue } from "@chakra-ui/react";
+import { Avatar, Flex, Tag, Text, useColorModeValue } from "@chakra-ui/react";
 import { useUser } from "../../../api/swr/users";
 
-import format from "date-fns/format";
 import { areEqual } from "react-window";
+import { formatRelative } from "date-fns";
 
 export interface MessageProps {
     content: string;
@@ -25,23 +25,20 @@ const Message: FC<MessageProps> = (props) => {
     }
 
     return (
-        <Flex p={2} _hover={{ backgroundColor: hoverBg }} borderRadius={"md"}>
+        <Flex p={2} py={3} _hover={{ backgroundColor: hoverBg }} borderRadius={"md"}>
             <Flex alignItems={"flex-start"}>
-                <Tag size="lg" colorScheme="red" borderRadius="full" mr={3}>
-                    <Avatar
-                        size="xs"
-                        name={userData.DisplayName}
-                        ml={-1}
-                        mr={2}
-                    />
-                    <TagLabel>{userData.DisplayName}</TagLabel>
-                </Tag>
+                <Avatar
+                    size={"md"}
+                    name={userData.DisplayName}
+                    mr={4}
+                />
             </Flex>
-            <Flex wordBreak={"break-word"} style={{ flex: 1 }}>
-                {content}
-            </Flex>
-            <Flex>
-                <Text color={"gray.400"}>{format(new Date(dateSent), "HH:mm MM/dd/yyyy")}</Text>
+            <Flex wordBreak={"break-word"} style={{ flex: 1 }} flexDirection={"column"} justifyContent={"center"} alignItems={"flex-start"}>
+                <Flex mb={1}>
+                    <Tag size={"md"}>{userData.DisplayName}</Tag>
+                    <Text ml={3} color={"gray.400"}>{formatRelative(new Date(dateSent), new Date())}</Text>
+                </Flex>
+                <Text color={"gray.100"}>{content}</Text>
             </Flex>
         </Flex>
     );

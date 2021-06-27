@@ -50,7 +50,7 @@ namespace Strife.API.Controllers
             Debug.Assert(HttpContext.Items["StrifeUserId"] != null, "HttpContext.Items['StrifeUserId'] != null");
             var userId = (Guid) HttpContext.Items["StrifeUserId"];
 
-            var guilds = await _dbContext.GuildStrifeUser
+            var guilds = await _dbContext.GuildStrifeUsers
                 .Where(gsu => gsu.UserId == userId)
                 .OrderBy(gsu => gsu.Sequence)
                 .Include(gsu => gsu.Guild)

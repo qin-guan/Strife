@@ -83,20 +83,20 @@ const CreateChannelModal = (props: CreateChannelModalProps): ReactElement => {
                 <ModalBody pb={6}>
                     <VStack spacing={"3"}>
                         <FormControl>
-                            <FormLabel>Group name</FormLabel>
-                            <Input
-                                placeholder="Group name"
-                                value={groupName}
-                                onChange={onGroupNameChange}
-                            />
-                        </FormControl>
-                        <FormControl>
                             <FormLabel>Name</FormLabel>
                             <Input
                                 ref={initialRef}
                                 placeholder="Name"
                                 value={channelName}
                                 onChange={onChannelNameChange}
+                            />
+                        </FormControl>
+                        <FormControl>
+                            <FormLabel>Group</FormLabel>
+                            <Input
+                                placeholder="Group"
+                                value={groupName}
+                                onChange={onGroupNameChange}
                             />
                         </FormControl>
                     </VStack>

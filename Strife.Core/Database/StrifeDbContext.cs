@@ -17,7 +17,8 @@ namespace Strife.Core.Database
         public DbSet<Channel> Channels { get; set; }
         public DbSet<Message> Messages { get; set; }
 
-        public DbSet<GuildStrifeUser> GuildStrifeUser { get; set; }
+        public DbSet<GuildStrifeUser> GuildStrifeUsers { get; set; }
+        public DbSet<GuildInvitation> GuildInvitations { get; set; }
 
         public StrifeDbContext(
             DbContextOptions options,

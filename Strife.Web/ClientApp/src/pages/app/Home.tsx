@@ -45,7 +45,7 @@ const Home = (): React.ReactElement => {
                                 onChangeSelectedChannel={channel => setSelectedChannel(channel)}/>
                         </Flex>
                         {selectedChannel &&
-                        <Flex style={{ flex: 1 }} direction={"column"}>
+                        <Flex style={{ flex: 1 }} direction={"column"} p={3}>
                             <ChannelHeader selectedGuild={selectedGuild} selectedChannel={selectedChannel}/>
                             <MessagesList selectedGuild={selectedGuild} selectedChannel={selectedChannel}/>
                             <MessageInput selectedGuild={selectedGuild} selectedChannel={selectedChannel}/>

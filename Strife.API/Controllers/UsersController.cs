@@ -46,7 +46,7 @@ namespace Strife.API.Controllers
             {
                 if (userId != requesterId)
                 {
-                    var gsus = await _dbContext.GuildStrifeUser.Where(gsu =>
+                    var gsus = await _dbContext.GuildStrifeUsers.Where(gsu =>
                         gsu.UserId == userId || gsu.UserId == requesterId).Select(g => g.GuildId).ToListAsync();
                     if (gsus.Distinct().Count() == gsus.Count) return Forbid();
                 }

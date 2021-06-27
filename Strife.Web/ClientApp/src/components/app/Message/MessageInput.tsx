@@ -29,7 +29,7 @@ export const MessageInput: FC<MessageInputProps> = (props) => {
     };
 
     return (
-        <Box p={3}>
+        <Box>
             <Input
                 bg={"gray.700"}
                 size={"lg"}

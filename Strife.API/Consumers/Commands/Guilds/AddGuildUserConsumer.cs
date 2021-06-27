@@ -22,7 +22,7 @@ namespace Strife.API.Consumers.Commands.Guilds
         
         public async Task Consume(ConsumeContext<IAddGuildUser> context)
         {
-            var guilds = _dbContext.GuildStrifeUser.Where(gsu => gsu.UserId == context.Message.InitiatedBy);
+            var guilds = _dbContext.GuildStrifeUsers.Where(gsu => gsu.UserId == context.Message.InitiatedBy);
             var sequence = !await guilds.AnyAsync() ? 0 : await guilds.MaxAsync(g => g.Sequence);
 
             var join = new GuildStrifeUser 
@@ -32,7 +32,7 @@ namespace Strife.API.Consumers.Commands.Guilds
                 Sequence = sequence + 1
             };
 
-            await _dbContext.GuildStrifeUser.AddAsync(join);
+            await _dbContext.GuildStrifeUsers.AddAsync(join);
             await _dbContext.SaveChangesAsync();
 
             await context.Publish<IGuildUserAdded>(new
