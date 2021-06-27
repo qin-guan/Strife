@@ -127,6 +127,9 @@ namespace Strife.API.Permissions
         /// The resulting permission string would be $"Guild/{guildId}/Role/{roleId}/Update/Allow"
         ///
         /// Tbh, I don't know if this makes sense either.
+        ///
+        /// TODO - Migrate to Strife.Auth and call with gRPC
+        /// TODO - Migrate off using ASP.NET Core Identity's claims table since string splitting is less efficient
         /// </summary>
         /// <returns>string</returns>
         public override string ToString() => ChildResource is null

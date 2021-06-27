@@ -108,6 +108,8 @@ namespace Strife.API
             services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
             services.AddScoped<IAuthorizationHandler, GuidAndClaimsListAuthorizationHandler>();
             services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
+
+            services.AddHealthChecks();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -143,6 +145,7 @@ namespace Strife.API
                 endpoints.MapControllers();
 
                 endpoints.MapHub<EventsHub>("/hub");
+                endpoints.MapHealthChecks("/health");
             });
         }
     }

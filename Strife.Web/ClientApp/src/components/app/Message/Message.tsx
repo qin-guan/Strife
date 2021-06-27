@@ -1,10 +1,10 @@
 import * as React from "react";
 import { FC, memo } from "react";
-import { Avatar, Box, Flex, Tag, TagLabel, Text, useColorModeValue } from "@chakra-ui/react";
+import { Avatar, Flex, Tag, TagLabel, Text, useColorModeValue } from "@chakra-ui/react";
 import { useUser } from "../../../api/swr/users";
-import { areEqual } from "react-window";
 
 import format from "date-fns/format";
+import { areEqual } from "react-window";
 
 export interface MessageProps {
     content: string;
@@ -25,8 +25,8 @@ const Message: FC<MessageProps> = (props) => {
     }
 
     return (
-        <Flex p={2} alignItems={"center"} justifyContent={"space-between"} _hover={{ backgroundColor: hoverBg }} borderRadius={"md"}>
-            <Flex alignItems={"center"}>
+        <Flex p={2} _hover={{ backgroundColor: hoverBg }} borderRadius={"md"}>
+            <Flex alignItems={"flex-start"}>
                 <Tag size="lg" colorScheme="red" borderRadius="full" mr={3}>
                     <Avatar
                         size="xs"
@@ -36,9 +36,13 @@ const Message: FC<MessageProps> = (props) => {
                     />
                     <TagLabel>{userData.DisplayName}</TagLabel>
                 </Tag>
-                <Text style={{ wordWrap: "break-word", maxWidth: "75%" }}>{content}</Text>
             </Flex>
-            <Text color={"gray.400"}>{format(new Date(dateSent), "HH:mm MM/dd/yyyy")}</Text>
+            <Flex wordBreak={"break-word"} style={{ flex: 1 }}>
+                {content}
+            </Flex>
+            <Flex>
+                <Text color={"gray.400"}>{format(new Date(dateSent), "HH:mm MM/dd/yyyy")}</Text>
+            </Flex>
         </Flex>
     );
 };

@@ -146,7 +146,7 @@ namespace Strife.API.Controllers
                 return Ok(new ChannelMetaResponseDto
                 {
                     PageSize = _messageOptions.PageSize,
-                    PageCount = pageCount == 0 ? 1 : pageCount
+                    PageCount = pageCount
                 });
             }
             catch (Exception exception)

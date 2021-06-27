@@ -29,6 +29,8 @@ namespace Strife.Web
             {
                 configuration.RootPath = "ClientApp/build";
             });
+
+            services.AddHealthChecks();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,6 +60,7 @@ namespace Strife.Web
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
+                endpoints.MapHealthChecks("/health");
             });
 
             app.UseSpa(spa =>

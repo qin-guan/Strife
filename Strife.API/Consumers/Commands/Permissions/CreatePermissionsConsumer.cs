@@ -24,7 +24,6 @@ namespace Strife.API.Consumers.Commands.Permissions
 
         public async Task Consume(ConsumeContext<ICreatePermissions> context)
         {
-            Log.Error("called create permissions");
             var role = await _dbContext.Roles.SingleOrDefaultAsync(r =>
                 r.Name == $"Guilds/{context.Message.GuildId}/Roles/{context.Message.RoleName}");
             if (role == default(GuildRole)) throw new Exception("Role was not found");
